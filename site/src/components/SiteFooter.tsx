@@ -122,8 +122,16 @@ function FooterMain() {
 function FooterBottomBar() {
   return (
     <div className="bg-black text-white">
-      <div className="max-w-[1400px] mx-auto px-6 py-4 text-xs">
-        Two Wheels — All rights reserved
+      <div className="max-w-[1400px] mx-auto px-6 py-4 text-xs flex flex-wrap items-center justify-between gap-3">
+        <span>Two Wheels — All rights reserved</span>
+        <nav aria-label="Legal" className="flex gap-5">
+          <Link href="/privacy-policy" className="text-zinc-400 hover:text-white">
+            Privacy
+          </Link>
+          <Link href="/terms" className="text-zinc-400 hover:text-white">
+            Terms
+          </Link>
+        </nav>
       </div>
     </div>
   )

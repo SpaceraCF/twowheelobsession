@@ -68,7 +68,10 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
   const brand = typeof bike.brand === "object" ? bike.brand : undefined
   const category = typeof bike.category === "object" ? bike.category : undefined
   const specs = bike.specs ?? {}
-  const filledSpecs = SPEC_ORDER.filter(([key]) => specs[key])
+  const specSections = SPEC_SECTIONS.map((s) => ({
+    title: s.title,
+    rows: s.rows.filter(([key]) => specs[key]),
+  })).filter((s) => s.rows.length > 0)
 
   return (
     <div className="bg-white">
@@ -165,18 +168,27 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
         </section>
       )}
 
-      {filledSpecs.length > 0 && (
+      {specSections.length > 0 && (
         <section className="bg-zinc-50 border-t border-zinc-200">
           <div className="max-w-[1400px] mx-auto px-6 py-12">
             <h2 className="text-2xl font-bold text-zinc-900">Specifications</h2>
-            <dl className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-3 text-sm">
-              {filledSpecs.map(([key, label]) => (
-                <div key={key} className="flex justify-between gap-4 border-b border-zinc-200 pb-2">
-                  <dt className="text-zinc-600">{label}</dt>
-                  <dd className="text-zinc-900 font-medium text-right">{specs[key]}</dd>
+            <div className="mt-8 space-y-10">
+              {specSections.map((section) => (
+                <div key={section.title}>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 border-b border-zinc-300 pb-2">
+                    {section.title}
+                  </h3>
+                  <dl className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-3 text-sm">
+                    {section.rows.map(([key, label]) => (
+                      <div key={key} className="flex justify-between gap-4 border-b border-zinc-200 pb-2">
+                        <dt className="text-zinc-600">{label}</dt>
+                        <dd className="text-zinc-900 font-medium text-right">{specs[key]}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
               ))}
-            </dl>
+            </div>
           </div>
         </section>
       )}
@@ -185,34 +197,46 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
   )
 }
 
-const SPEC_ORDER: Array<[string, string]> = [
-  // Engine
-  ["engineType", "Engine"],
-  ["engineDisplacement", "Displacement"],
-  ["bore", "Bore × stroke"],
-  ["compression", "Compression ratio"],
-  ["lubrication", "Lubrication"],
-  ["fuelSystem", "Fuel system"],
-  ["ignition", "Ignition"],
-  ["starter", "Starter"],
-  ["fuelTank", "Fuel tank"],
-  ["oilCapacity", "Oil capacity"],
-  ["finalDrive", "Final drive"],
-  ["transmission", "Transmission"],
-  // Chassis
-  ["frame", "Frame"],
-  ["frontSuspension", "Front suspension"],
-  ["rearSuspension", "Rear suspension"],
-  ["frontBrakes", "Front brakes"],
-  ["rearBrakes", "Rear brakes"],
-  ["frontTyre", "Front tyre"],
-  ["rearTyre", "Rear tyre"],
-  // Dimensions
-  ["length", "Length"],
-  ["width", "Width"],
-  ["height", "Height"],
-  ["seatHeight", "Seat height"],
-  ["wheelbase", "Wheelbase"],
-  ["clearance", "Ground clearance"],
-  ["weight", "Weight"],
+const SPEC_SECTIONS: Array<{ title: string; rows: Array<[string, string]> }> = [
+  {
+    title: "Engine",
+    rows: [
+      ["engineType", "Engine"],
+      ["engineDisplacement", "Displacement"],
+      ["bore", "Bore × stroke"],
+      ["compression", "Compression ratio"],
+      ["lubrication", "Lubrication"],
+      ["fuelSystem", "Fuel system"],
+      ["ignition", "Ignition"],
+      ["starter", "Starter"],
+      ["fuelTank", "Fuel tank"],
+      ["oilCapacity", "Oil capacity"],
+      ["finalDrive", "Final drive"],
+      ["transmission", "Transmission"],
+    ],
+  },
+  {
+    title: "Chassis",
+    rows: [
+      ["frame", "Frame"],
+      ["frontSuspension", "Front suspension"],
+      ["rearSuspension", "Rear suspension"],
+      ["frontBrakes", "Front brakes"],
+      ["rearBrakes", "Rear brakes"],
+      ["frontTyre", "Front tyre"],
+      ["rearTyre", "Rear tyre"],
+    ],
+  },
+  {
+    title: "Dimensions",
+    rows: [
+      ["length", "Length"],
+      ["width", "Width"],
+      ["height", "Height"],
+      ["seatHeight", "Seat height"],
+      ["wheelbase", "Wheelbase"],
+      ["clearance", "Ground clearance"],
+      ["weight", "Weight"],
+    ],
+  },
 ]

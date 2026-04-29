@@ -79,24 +79,17 @@ export function SiteHeader() {
           ))}
         </nav>
 
+        {/* Customer-facing icons (search, wishlist, cart) intentionally omitted
+            in v1 — we don't have e-commerce yet and dead icons are worse than
+            no icons. Staff link via the admin button. */}
         <div className="flex items-center gap-5 text-black ml-auto lg:ml-0">
-          <button aria-label="Search" className="hover:text-black" type="button">
-            <SearchIcon />
-          </button>
-          <Link href="/admin" aria-label="Account" className="hover:text-black">
+          <Link
+            href="/admin"
+            aria-label="Staff admin"
+            title="Staff admin"
+            className="hover:text-[--color-accent]"
+          >
             <UserIcon />
-          </Link>
-          <Link href="/wishlist" aria-label="Wishlist" className="relative hover:text-black">
-            <HeartIcon />
-            <span className="absolute -top-1.5 -right-2 bg-[--color-accent] text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
-              0
-            </span>
-          </Link>
-          <Link href="/cart" aria-label="Cart" className="relative hover:text-black">
-            <CartIcon />
-            <span className="absolute -top-1.5 -right-2 bg-[--color-accent] text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
-              0
-            </span>
           </Link>
         </div>
       </div>
@@ -112,35 +105,11 @@ function ClockIcon() {
     </svg>
   )
 }
-function SearchIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.35-4.35" />
-    </svg>
-  )
-}
 function UserIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
-}
-function HeartIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  )
-}
-function CartIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="21" r="1" />
-      <circle cx="20" cy="21" r="1" />
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
     </svg>
   )
 }

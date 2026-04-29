@@ -253,15 +253,44 @@ function extractSpecs(s: Record<string, string | number | null>) {
 
 function cleanLongDescription(html: string | null | undefined): string | undefined {
   if (!html) return undefined
-  // Yamaha LongDescription is HTML with <br> for line breaks. Convert to
-  // plain text with paragraphs separated by blank lines.
-  const text = html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/?p[^>]*>/gi, '\n\n')
-    .replace(/<[^>]+>/g, '')
-    // Collapse runs of whitespace within a line, then collapse 3+ newlines to a paragraph break.
+  // Yamaha LongDescription is HTML with <br> for line breaks and named
+  // entities like &rsquo;/&mdash;. Convert to plain text with paragraphs
+  // separated by blank lines and entities decoded to real characters.
+  const text = decodeHtmlEntities(
+    html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/?p[^>]*>/gi, '\n\n')
+      .replace(/<[^>]+>/g, ''),
+  )
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
   return text || undefined
+}
+
+const HTML_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  rsquo: '’',
+  lsquo: '‘',
+  rdquo: '”',
+  ldquo: '“',
+  mdash: '—',
+  ndash: '–',
+  hellip: '…',
+  trade: '™',
+  reg: '®',
+  copy: '©',
+  deg: '°',
+}
+
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&([a-z]+);/gi, (m, name: string) => HTML_ENTITIES[name.toLowerCase()] ?? m)
 }

@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { buildEnquiryEmail } from '../lib/notifications/build.ts'
+
 export const Enquiries: CollectionConfig = {
   slug: 'enquiries',
   admin: {
@@ -9,6 +11,24 @@ export const Enquiries: CollectionConfig = {
   },
   access: {
     create: () => true,
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+        const to = process.env.ENQUIRY_NOTIFY_EMAIL
+        if (!to || !req.payload.email) return
+        try {
+          const { subject, text } = buildEnquiryEmail(doc as Record<string, unknown>)
+          await req.payload.sendEmail({ to, subject, text })
+        } catch (err) {
+          req.payload.logger.error(
+            { err },
+            '[Enquiries] notification email failed (record still saved)',
+          )
+        }
+      },
+    ],
   },
   fields: [
     {

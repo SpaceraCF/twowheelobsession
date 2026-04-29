@@ -53,6 +53,18 @@ services:
         value: 26ea01c9-ab51-41f3-8297-7adbde8fe872
       - key: EPC_PRODUCT_KEY_YAMAHA
         value: 324d31df-d5ab-4449-85a7-43e5a97c3e28
+      # Email notifications via Resend. Sign up at resend.com (free tier:
+      # ~100 emails/day, more than enough for enquiry volume), set the
+      # RESEND_API_KEY in the Render dashboard. Until a custom domain is
+      # verified with Resend, RESEND_FROM_EMAIL=onboarding@resend.dev works.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev
+      - key: RESEND_FROM_NAME
+        value: Two Wheel Obsession
+      - key: ENQUIRY_NOTIFY_EMAIL
+        value: enquiries@twowheelobsession.com.au
 
   - type: cron
     name: twowo-yamaha-sync

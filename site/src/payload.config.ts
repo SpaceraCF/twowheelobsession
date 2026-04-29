@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -39,6 +40,17 @@ export default buildConfig({
     Pages,
   ],
   editor: lexicalEditor(),
+  // Email: Resend if RESEND_API_KEY is set, otherwise Payload writes to
+  // console (default). RESEND_FROM_EMAIL must be on a domain you've
+  // verified with Resend; until then, Resend's onboarding@resend.dev
+  // works as a sender.
+  email: process.env.RESEND_API_KEY
+    ? resendAdapter({
+        apiKey: process.env.RESEND_API_KEY,
+        defaultFromAddress: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+        defaultFromName: process.env.RESEND_FROM_NAME || 'Two Wheel Obsession',
+      })
+    : undefined,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
