@@ -137,6 +137,17 @@ function mapYamahaToNewBike(args: {
   categoryId: number
 }) {
   const { summary, detail, colors, brandId, categoryId } = args
+  // RecommendedRetail (AUD) is the dealer-facing RRP. 0 means "no price set"
+  // for that bike — leave undefined so the frontend renders "Price on request".
+  const price =
+    typeof detail.RecommendedRetail === 'number' && detail.RecommendedRetail > 0
+      ? detail.RecommendedRetail
+      : undefined
+  // Map Yamaha's bike-level Status to our listing status.
+  const yamahaStatus = (detail.Status ?? '').toUpperCase()
+  const status =
+    yamahaStatus === 'DISCONTINUED' ? ('discontinued' as const) : ('available' as const)
+
   return {
     displayName: summary.ModelName,
     slug: slugify(`yamaha-${summary.ModelName}-${summary.YearModel}`),
@@ -151,11 +162,13 @@ function mapYamahaToNewBike(args: {
     colors: extractColors(detail, colors),
     descriptionText: cleanLongDescription(detail.LongDescription),
     specs: extractSpecs(detail.ProductSpec),
+    price,
+    priceLabel: price ? 'Ride away' : undefined,
     source: 'yamaha-api' as const,
     externalId: String(summary.ID),
     rawApiData: { summary, detail } as unknown as Record<string, unknown>,
     lastSyncedAt: new Date().toISOString(),
-    status: 'available' as const,
+    status,
   }
 }
 

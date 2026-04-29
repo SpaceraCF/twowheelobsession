@@ -46,6 +46,9 @@ export type YamahaDetail = {
   ItemWeight: number
   PrimaryCategory: number
   ProductSpec: Record<string, string | number | null>
+  RecommendedRetail?: number | null
+  RecommendedRetail_NZ?: number | null
+  Status?: string | null
 }
 
 async function getJson<T>(url: string): Promise<T> {
