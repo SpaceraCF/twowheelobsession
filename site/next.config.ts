@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.yamaha-motor.com.au' },
+      // Yamaha API sometimes returns URLs with explicit :443 port — match that too.
+      { protocol: 'https', hostname: 'www.yamaha-motor.com.au', port: '443' },
     ],
   },
 }

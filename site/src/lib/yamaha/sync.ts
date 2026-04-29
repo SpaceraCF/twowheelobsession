@@ -143,7 +143,7 @@ function mapYamahaToNewBike(args: {
     modelCode: detail.ItemModelCode || undefined,
     baseModel: detail.Basemodel || undefined,
     primaryImage: undefined as never,
-    externalImageUrl: summary.SummaryImage || undefined,
+    externalImageUrl: cleanImageUrl(summary.SummaryImage),
     colors: extractColors(detail),
     specs: extractSpecs(detail.ProductSpec),
     source: 'yamaha-api' as const,
@@ -152,6 +152,14 @@ function mapYamahaToNewBike(args: {
     lastSyncedAt: new Date().toISOString(),
     status: 'available' as const,
   }
+}
+
+// Yamaha returns URLs with an explicit :443 port suffix
+// (https://www.yamaha-motor.com.au:443/...) which trips up next/image's
+// remote pattern matcher. Strip the redundant port.
+function cleanImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  return url.replace(/^(https):\/\/([^:/]+):443\//, '$1://$2/')
 }
 
 function extractColors(detail: YamahaDetail) {
