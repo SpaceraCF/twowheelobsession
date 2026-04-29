@@ -149,6 +149,7 @@ function mapYamahaToNewBike(args: {
     primaryImage: undefined as never,
     externalImageUrl: cleanImageUrl(summary.SummaryImage),
     colors: extractColors(detail, colors),
+    descriptionText: cleanLongDescription(detail.LongDescription),
     specs: extractSpecs(detail.ProductSpec),
     source: 'yamaha-api' as const,
     externalId: String(summary.ID),
@@ -211,20 +212,56 @@ function extractColors(detail: YamahaDetail, colors: YamahaColor[]) {
 }
 
 function extractSpecs(s: Record<string, string | number | null>) {
-  const v = (k: string) => (s[k] != null && String(s[k]).trim() ? String(s[k]) : undefined)
+  const v = (...keys: string[]) => {
+    for (const k of keys) {
+      if (s[k] != null && String(s[k]).trim()) return String(s[k])
+    }
+    return undefined
+  }
   return {
+    // Engine
+    engineType: v('Engine'),
     engineDisplacement: v('Displacement'),
     bore: v('Bore'),
     compression: v('Compression'),
-    fuelTank: v('Fuel_Tank') ?? v('FuelTank'),
-    weight: v('Weight') ?? v('Wet_Weight'),
-    seatHeight: v('Seat_Height') ?? v('SeatHeight'),
+    lubrication: v('Lubrication'),
+    fuelSystem: v('Fuel'),
+    ignition: v('Ignition'),
+    starter: v('Starter'),
+    fuelTank: v('Fuel_Tank', 'FuelTank'),
+    oilCapacity: v('Oil', 'Oil_Capacity'),
+    finalDrive: v('Final_Trans', 'Final_Drive'),
     transmission: v('Transmission'),
+    // Chassis
+    frame: v('Frame'),
+    frontSuspension: v('Suspension_Front', 'Front_Suspension'),
+    rearSuspension: v('Suspension_Rear', 'Rear_Suspension'),
     frontBrakes: v('Brakes_Front'),
     rearBrakes: v('Brakes_Rear'),
-    frontSuspension: v('Suspension_Front') ?? v('Front_Suspension'),
-    rearSuspension: v('Suspension_Rear') ?? v('Rear_Suspension'),
-    frontTyre: v('Tyre_Front') ?? v('Front_Tyre'),
-    rearTyre: v('Tyre_Rear') ?? v('Rear_Tyre'),
+    frontTyre: v('Tyres_Front', 'Tyre_Front', 'Front_Tyre'),
+    rearTyre: v('Tyres_Rear', 'Tyre_Rear', 'Rear_Tyre'),
+    // Dimensions
+    length: v('Length'),
+    width: v('Width'),
+    height: v('Height'),
+    seatHeight: v('Seat_Height', 'SeatHeight'),
+    wheelbase: v('Wheelbase'),
+    clearance: v('Clearance', 'Ground_Clearance'),
+    weight: v('Weight', 'Wet_Weight'),
   }
+}
+
+function cleanLongDescription(html: string | null | undefined): string | undefined {
+  if (!html) return undefined
+  // Yamaha LongDescription is HTML with <br> for line breaks. Convert to
+  // plain text with paragraphs separated by blank lines.
+  const text = html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?p[^>]*>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    // Collapse runs of whitespace within a line, then collapse 3+ newlines to a paragraph break.
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+  return text || undefined
 }

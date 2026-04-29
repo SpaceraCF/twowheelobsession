@@ -19,6 +19,7 @@ type Bike = {
   baseModel?: string
   tagline?: string
   description?: unknown
+  descriptionText?: string
   externalImageUrl?: string
   primaryImage?: unknown
   brand?: Brand | string | number
@@ -154,6 +155,16 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
         </div>
       </BikeShowcase>
 
+      {bike.descriptionText && (
+        <section className="border-t border-zinc-200">
+          <div className="max-w-[1400px] mx-auto px-6 py-10 space-y-4 text-zinc-700 leading-relaxed">
+            {bike.descriptionText.split(/\n{2,}/).map((para, i) => (
+              <p key={i}>{para.trim()}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
       {filledSpecs.length > 0 && (
         <section className="bg-zinc-50 border-t border-zinc-200">
           <div className="max-w-[1400px] mx-auto px-6 py-12">
@@ -175,18 +186,33 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
 }
 
 const SPEC_ORDER: Array<[string, string]> = [
-  ["engineDisplacement", "Engine displacement"],
-  ["engineType", "Engine type"],
+  // Engine
+  ["engineType", "Engine"],
+  ["engineDisplacement", "Displacement"],
   ["bore", "Bore × stroke"],
   ["compression", "Compression ratio"],
+  ["lubrication", "Lubrication"],
+  ["fuelSystem", "Fuel system"],
+  ["ignition", "Ignition"],
+  ["starter", "Starter"],
   ["fuelTank", "Fuel tank"],
+  ["oilCapacity", "Oil capacity"],
+  ["finalDrive", "Final drive"],
   ["transmission", "Transmission"],
-  ["weight", "Weight"],
-  ["seatHeight", "Seat height"],
-  ["frontBrakes", "Front brakes"],
-  ["rearBrakes", "Rear brakes"],
+  // Chassis
+  ["frame", "Frame"],
   ["frontSuspension", "Front suspension"],
   ["rearSuspension", "Rear suspension"],
+  ["frontBrakes", "Front brakes"],
+  ["rearBrakes", "Rear brakes"],
   ["frontTyre", "Front tyre"],
   ["rearTyre", "Rear tyre"],
+  // Dimensions
+  ["length", "Length"],
+  ["width", "Width"],
+  ["height", "Height"],
+  ["seatHeight", "Seat height"],
+  ["wheelbase", "Wheelbase"],
+  ["clearance", "Ground clearance"],
+  ["weight", "Weight"],
 ]

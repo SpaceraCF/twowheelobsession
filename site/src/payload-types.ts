@@ -281,6 +281,10 @@ export interface NewBike {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Plain-text marketing description (auto-populated from manufacturer API). Paragraphs separated by blank lines.
+   */
+  descriptionText?: string | null;
   features?:
     | {
         feature?: string | null;
@@ -338,20 +342,32 @@ export interface NewBike {
     | null;
   brochureUrl?: string | null;
   specs?: {
-    engineDisplacement?: string | null;
     engineType?: string | null;
+    engineDisplacement?: string | null;
     bore?: string | null;
     compression?: string | null;
+    lubrication?: string | null;
+    fuelSystem?: string | null;
+    ignition?: string | null;
+    starter?: string | null;
     fuelTank?: string | null;
-    weight?: string | null;
-    seatHeight?: string | null;
+    oilCapacity?: string | null;
+    finalDrive?: string | null;
     transmission?: string | null;
-    frontBrakes?: string | null;
-    rearBrakes?: string | null;
+    frame?: string | null;
     frontSuspension?: string | null;
     rearSuspension?: string | null;
+    frontBrakes?: string | null;
+    rearBrakes?: string | null;
     frontTyre?: string | null;
     rearTyre?: string | null;
+    length?: string | null;
+    width?: string | null;
+    height?: string | null;
+    seatHeight?: string | null;
+    wheelbase?: string | null;
+    clearance?: string | null;
+    weight?: string | null;
   };
   source: 'yamaha-api' | 'manual';
   /**
@@ -818,6 +834,7 @@ export interface NewBikesSelect<T extends boolean = true> {
   slug?: T;
   tagline?: T;
   description?: T;
+  descriptionText?: T;
   features?:
     | T
     | {
@@ -853,20 +870,32 @@ export interface NewBikesSelect<T extends boolean = true> {
   specs?:
     | T
     | {
-        engineDisplacement?: T;
         engineType?: T;
+        engineDisplacement?: T;
         bore?: T;
         compression?: T;
+        lubrication?: T;
+        fuelSystem?: T;
+        ignition?: T;
+        starter?: T;
         fuelTank?: T;
-        weight?: T;
-        seatHeight?: T;
+        oilCapacity?: T;
+        finalDrive?: T;
         transmission?: T;
-        frontBrakes?: T;
-        rearBrakes?: T;
+        frame?: T;
         frontSuspension?: T;
         rearSuspension?: T;
+        frontBrakes?: T;
+        rearBrakes?: T;
         frontTyre?: T;
         rearTyre?: T;
+        length?: T;
+        width?: T;
+        height?: T;
+        seatHeight?: T;
+        wheelbase?: T;
+        clearance?: T;
+        weight?: T;
       };
   source?: T;
   externalId?: T;
