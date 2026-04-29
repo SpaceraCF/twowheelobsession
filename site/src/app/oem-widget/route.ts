@@ -73,18 +73,295 @@ function buildWidgetHtml(accessKey: string) {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Yamaha OEM Parts Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
 <link rel="stylesheet" href="/oem/styles/libs/leaflet.css"/>
 <link rel="stylesheet" href="/oem/styles/libs/basictable.min.css"/>
 <link rel="stylesheet" href="/oem/styles/libs/imgViewer2.min.css"/>
 <link rel="stylesheet" href="/oem/styles/yamaha.css"/>
 <style>
-  body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: #fff; color: #1a1a1a; }
-  #yamaha-oem-parts-lookup { max-width: 1280px; margin: 0 auto; }
-  #yamaha-oem-filterpanel select { padding: 8px 10px; margin: 0 8px 12px 0; min-width: 200px; }
-  #PartsList { width: 100%; border-collapse: collapse; }
-  #PartsList th, #PartsList td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
-  #loading-image_ajax { display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  /* ===== Modern overrides for the EPC widget. Loaded AFTER yamaha.css so
+     these win in cascade. !important is used where the plugin's CSS uses
+     specific IDs we can't outweigh otherwise. ===== */
+  :root {
+    --ink: #18181b;
+    --ink-muted: #52525b;
+    --ink-soft: #71717a;
+    --line: #e4e4e7;
+    --line-soft: #f4f4f5;
+    --bg: #ffffff;
+    --bg-alt: #fafafa;
+    --accent: #d72631;
+    --accent-dark: #b01e26;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg-alt);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #yamaha-oem-parts-lookup {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+
+  /* ---------- Step / filter panel ---------- */
+  #yamaha-oem-filterpanel {
+    background: var(--bg) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin: 0 auto 24px !important;
+    height: auto !important;
+    width: 100% !important;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+  }
+
+  #yamaha-oem-filterpanel > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* Auto-labels for each step using ::before */
+  #YearSelection::before    { content: '1. Year'; }
+  #ModelSelection::before   { content: '2. Model'; }
+  #ContentSelection::before { content: '3. Section'; }
+  #AssemblySelection::before { content: '4. Assembly'; }
+  #TypeSelection::before    { content: 'Type'; display: none; } /* hidden when single type */
+  #yamaha-oem-filterpanel > div::before {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+  }
+
+  #yamaha-oem-filterpanel select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    float: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    padding: 11px 38px 11px 14px !important;
+    background: var(--bg) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 8px !important;
+    color: var(--ink) !important;
+    font: inherit !important;
+    text-transform: none !important;
+    cursor: pointer;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 12px 8px !important;
+  }
+  #yamaha-oem-filterpanel select:hover { border-color: var(--ink-muted) !important; }
+  #yamaha-oem-filterpanel select:focus {
+    outline: none !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(215, 38, 49, 0.15) !important;
+  }
+
+  /* ---------- Diagram + parts area ---------- */
+  #yamaha-oem-AssemblyContainer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 0 !important;
+  }
+
+  @media (min-width: 1024px) {
+    #yamaha-oem-AssemblyContainer {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  #Diagram {
+    background: var(--bg) !important;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    margin: 0 !important;
+    min-height: 320px;
+  }
+  #newCanvas {
+    width: 100% !important;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  #PartsListContainer {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin: 0 !important;
+  }
+
+  /* ---------- Parts table ---------- */
+  #yamaha-oem-AssemblyContainer #PartsList,
+  #yamaha-oem-filterpanel #SearchPartsList {
+    width: 100% !important;
+    border-collapse: collapse;
+    font-size: 14px !important;
+    color: var(--ink) !important;
+    background: var(--bg);
+  }
+  #yamaha-oem-filterpanel #PartsList th,
+  #yamaha-oem-AssemblyContainer #PartsList thead th {
+    background: var(--bg-alt) !important;
+    color: var(--ink-soft) !important;
+    text-transform: uppercase !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em;
+    text-align: left;
+    padding: 12px 14px !important;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr > td {
+    background: var(--bg) !important;
+    color: var(--ink) !important;
+    padding: 12px 14px !important;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: middle;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr:nth-child(odd) > td {
+    background: var(--bg) !important;
+    color: var(--ink) !important;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr:hover > td {
+    background: var(--bg-alt) !important;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr:last-child > td {
+    border-bottom: 0;
+  }
+
+  /* Quantity input */
+  #yamaha-oem-AssemblyContainer #PartsList input[type="text"].qtyTextbox {
+    width: 56px !important;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font: inherit;
+    text-align: center;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  #yamaha-oem-AssemblyContainer #PartsList input.qtyTextbox:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(215, 38, 49, 0.15);
+  }
+
+  /* Add to Cart button */
+  #yamaha-oem-AssemblyContainer #PartsList input[type="button"].btnAddToCart {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border: 0 !important;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 120ms ease;
+    text-transform: none;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList input[type="button"].btnAddToCart:hover {
+    background: var(--accent-dark) !important;
+  }
+  .successButton { color: #15803d !important; font-weight: 600 !important; font-size: 13px !important; }
+
+  /* Hide the Diagram/PartsListContainer until they have content (avoids
+     empty zinc rectangles on first paint). */
+  #Diagram:empty, #PartsListContainer:has(tbody:empty) tbody { }
+
+  /* ---------- Loading indicator (replace gif with spinner) ---------- */
+  #loading-image_ajax {
+    display: none;
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 28px; height: 28px;
+    visibility: hidden;
+  }
+  body.loading::after {
+    content: '';
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 28px; height: 28px;
+    border: 3px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    z-index: 9999;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Misc ---------- */
+  #yamaha-oem-imageWrap {
+    margin: 24px 0 0 0 !important;
+    padding: 0 !important;
+  }
+  div.modelImageContainer {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 280px;
+    height: 170px;
+    margin: 0 8px 8px 0;
+  }
+  div.partinfopanel {
+    background: #1f2937 !important;
+    color: #fff !important;
+    border: 0 !important;
+    padding: 6px 10px !important;
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  @media (max-width: 640px) {
+    #yamaha-oem-parts-lookup { padding: 16px 12px 32px; }
+    #yamaha-oem-filterpanel { padding: 16px !important; }
+  }
 </style>
+<script>
+  // Toggle a body class for the loading state — drives the spinner above.
+  // (Plugin shows/hides #loading-image_ajax via jQuery; mirror that.)
+  (function() {
+    document.addEventListener('DOMContentLoaded', function () {
+      var bodyEl = document.body;
+      var observer = new MutationObserver(function () {
+        var img = document.getElementById('loading-image_ajax');
+        if (!img) return;
+        var visible = img.style.display !== 'none' && img.offsetParent !== null;
+        bodyEl.classList.toggle('loading', visible);
+      });
+      var img = document.getElementById('loading-image_ajax');
+      if (img) observer.observe(img, { attributes: true, attributeFilter: ['style'] });
+    });
+  })();
+</script>
 </head>
 <body>
 <div id="yamaha-oem-parts-lookup">
