@@ -5,16 +5,17 @@ import config from "@payload-config"
 import { BikeCard } from "@/components/BikeCard"
 
 export async function FeaturedBikes() {
-  const payload = await getPayload({ config })
-  const result = await payload.find({
-    collection: "new-bikes",
-    limit: 8,
-    sort: "-year",
-    depth: 1,
-    where: { status: { equals: "available" } },
-  })
+  let docs: Awaited<ReturnType<typeof getDocs>> = []
+  try {
+    docs = await getDocs()
+  } catch (err) {
+    // Silently fail (e.g. DB not reachable during build prerender). The section
+    // simply doesn't render — the rest of the homepage still works.
+    console.warn("[FeaturedBikes] Could not load bikes:", err instanceof Error ? err.message : err)
+    return null
+  }
 
-  if (result.docs.length === 0) return null
+  if (docs.length === 0) return null
 
   return (
     <section className="border-b border-zinc-200">
@@ -34,11 +35,23 @@ export async function FeaturedBikes() {
           </Link>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {result.docs.map((bike) => (
+          {docs.map((bike) => (
             <BikeCard key={bike.id} bike={bike} />
           ))}
         </div>
       </div>
     </section>
   )
+}
+
+async function getDocs() {
+  const payload = await getPayload({ config })
+  const result = await payload.find({
+    collection: "new-bikes",
+    limit: 8,
+    sort: "-year",
+    depth: 1,
+    where: { status: { equals: "available" } },
+  })
+  return result.docs
 }
