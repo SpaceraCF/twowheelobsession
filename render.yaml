@@ -1,12 +1,13 @@
 # Render Blueprint for Two Wheel Obsession.
 # Deploy via https://render.com/docs/blueprint-spec
-# Region "syd" = Sydney, closest to the customer base.
+# Region "singapore" — closest APAC region to the AU customer base
+# (Render doesn't offer Sydney as of writing).
 
 databases:
   - name: twowo-postgres
     databaseName: twowo
     user: twowo
-    region: syd
+    region: singapore
     plan: basic-256mb
     postgresMajorVersion: "16"
 
@@ -14,7 +15,7 @@ services:
   - type: web
     name: twowo-site
     runtime: node
-    region: syd
+    region: singapore
     plan: starter
     rootDir: site
     buildCommand: npm ci && npm run build
@@ -49,7 +50,7 @@ services:
   - type: cron
     name: twowo-yamaha-sync
     runtime: node
-    region: syd
+    region: singapore
     plan: starter
     rootDir: site
     # Hourly, 5 mins past the hour. Cheap (a sync run takes ~10 sec).
