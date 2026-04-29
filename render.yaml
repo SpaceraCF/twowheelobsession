@@ -11,6 +11,21 @@ databases:
     plan: basic-256mb
     postgresMajorVersion: "16"
 
+# Shared secrets referenced by both the web service and the sync cron.
+# `fromService` env-var linking in Render only resolves at the *first*
+# deploy — if the web service's secret is later rotated or set manually,
+# the cron's copy goes stale and the cron starts hitting 401s. Putting
+# the shared secret in an envVarGroup avoids that drift: the value is
+# owned by the group and both services see whatever it currently is.
+#
+# After applying this blueprint, set SYNC_SECRET once in the Render
+# dashboard (Env Groups → twowo-shared) and both services pick it up.
+envVarGroups:
+  - name: twowo-shared
+    envVars:
+      - key: SYNC_SECRET
+        sync: false
+
 services:
   - type: web
     name: twowo-site
@@ -39,8 +54,7 @@ services:
           property: connectionString
       - key: PAYLOAD_SECRET
         generateValue: true
-      - key: SYNC_SECRET
-        generateValue: true
+      - fromGroup: twowo-shared
       - key: FEED_SECRET
         generateValue: true
       - key: PAYLOAD_MEDIA_DIR
@@ -86,8 +100,4 @@ services:
           name: twowo-site
           type: web
           envVarKey: SITE_URL
-      - key: SYNC_SECRET
-        fromService:
-          name: twowo-site
-          type: web
-          envVarKey: SYNC_SECRET
+      - fromGroup: twowo-shared
