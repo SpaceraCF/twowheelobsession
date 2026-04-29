@@ -20,7 +20,7 @@ const BRAND_LOGOS = [
 export function SiteHeader() {
   return (
     <header className="bg-white border-b border-[--color-line]">
-      <div className="border-b border-[--color-line]">
+      <div className="hidden md:block border-b border-[--color-line]">
         <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center gap-6">
           <Link href="/oem-parts-finder" className="shrink-0 hover:opacity-80">
             <Image
