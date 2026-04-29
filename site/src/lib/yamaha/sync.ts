@@ -5,6 +5,8 @@ import { slugify } from '../slug'
 import {
   getMotorcycleSummaries,
   getProductById,
+  getProductColors,
+  type YamahaColor,
   type YamahaDetail,
   type YamahaSummary,
 } from './client'
@@ -50,8 +52,9 @@ export async function syncYamahaBikes(): Promise<SyncResult> {
   for (const summary of summaries) {
     try {
       const detail = await getProductById(summary.ID)
+      const colors = await getProductColors(summary.ID).catch(() => [] as YamahaColor[])
       const categoryId = await findOrCreateCategoryFromYamaha(payload, summary)
-      const data = mapYamahaToNewBike({ summary, detail, brandId: yamahaBrand, categoryId })
+      const data = mapYamahaToNewBike({ summary, detail, colors, brandId: yamahaBrand, categoryId })
 
       const existing = await payload.find({
         collection: 'new-bikes',
@@ -129,10 +132,11 @@ async function findOrCreateCategoryFromYamaha(payload: Payload, summary: YamahaS
 function mapYamahaToNewBike(args: {
   summary: YamahaSummary
   detail: YamahaDetail
+  colors: YamahaColor[]
   brandId: number
   categoryId: number
 }) {
-  const { summary, detail, brandId, categoryId } = args
+  const { summary, detail, colors, brandId, categoryId } = args
   return {
     displayName: summary.ModelName,
     slug: slugify(`yamaha-${summary.ModelName}-${summary.YearModel}`),
@@ -144,7 +148,7 @@ function mapYamahaToNewBike(args: {
     baseModel: detail.Basemodel || undefined,
     primaryImage: undefined as never,
     externalImageUrl: cleanImageUrl(summary.SummaryImage),
-    colors: extractColors(detail),
+    colors: extractColors(detail, colors),
     specs: extractSpecs(detail.ProductSpec),
     source: 'yamaha-api' as const,
     externalId: String(summary.ID),
@@ -162,12 +166,36 @@ function cleanImageUrl(url: string | null | undefined): string | undefined {
   return url.replace(/^(https):\/\/([^:/]+):443\//, '$1://$2/')
 }
 
-function extractColors(detail: YamahaDetail) {
-  const out: Array<{ name: string }> = []
-  for (let i = 1; i <= 10; i++) {
-    const name = (detail as unknown as Record<string, string | null>)[`Colour${i}`]
-    if (name && name.trim()) out.push({ name: name.trim() })
+function extractColors(detail: YamahaDetail, colors: YamahaColor[]) {
+  const byName = new Map<string, string | undefined>()
+  for (const c of colors) {
+    const name = c.Name?.trim()
+    if (!name) continue
+    byName.set(name.toLowerCase(), cleanImageUrl(c.ImageUrl))
   }
+
+  const out: Array<{ name: string; imageUrl?: string }> = []
+  const seen = new Set<string>()
+  for (let i = 1; i <= 10; i++) {
+    const raw = (detail as unknown as Record<string, string | null>)[`Colour${i}`]
+    const name = raw?.trim()
+    if (!name) continue
+    const key = name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({ name, imageUrl: byName.get(key) })
+  }
+
+  // Include any colours from the colours endpoint that weren't in the detail list.
+  for (const c of colors) {
+    const name = c.Name?.trim()
+    if (!name) continue
+    const key = name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({ name, imageUrl: cleanImageUrl(c.ImageUrl) })
+  }
+
   return out
 }
 

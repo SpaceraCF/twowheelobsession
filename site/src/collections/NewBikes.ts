@@ -63,6 +63,11 @@ export const NewBikes: CollectionConfig = {
                 { name: 'name', type: 'text', required: true },
                 { name: 'hex', type: 'text', admin: { description: 'CSS hex code, e.g. #FFCC00' } },
                 { name: 'image', type: 'upload', relationTo: 'media' },
+                {
+                  name: 'imageUrl',
+                  type: 'text',
+                  admin: { description: 'External per-colour image URL (e.g. from Yamaha API). Used until image is downloaded into Media.' },
+                },
               ],
             },
             { name: 'brochureUrl', type: 'text' },
