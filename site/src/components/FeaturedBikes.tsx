@@ -48,10 +48,15 @@ async function getDocs() {
   const payload = await getPayload({ config })
   const result = await payload.find({
     collection: "new-bikes",
-    limit: 8,
+    limit: 50,
     sort: "-year",
     depth: 1,
     where: { status: { equals: "available" } },
   })
-  return result.docs
+  const pool = [...result.docs]
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[pool[i], pool[j]] = [pool[j], pool[i]]
+  }
+  return pool.slice(0, 8)
 }
