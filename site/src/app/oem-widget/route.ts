@@ -225,6 +225,11 @@ function buildWidgetHtml(accessKey: string) {
     gap: 20px;
     margin: 0 !important;
   }
+  /* Hide diagram + parts table until an assembly has been picked
+     (the widget JS injects an <img> into #newCanvas when ready). */
+  #yamaha-oem-AssemblyContainer:not(:has(#newCanvas > *)) {
+    display: none !important;
+  }
 
   @media (min-width: 1024px) {
     #yamaha-oem-AssemblyContainer {
@@ -319,6 +324,30 @@ function buildWidgetHtml(accessKey: string) {
   }
   #yamaha-oem-AssemblyContainer #PartsList tbody > tr:last-child > td {
     border-bottom: 0;
+  }
+
+  /* Column sizing — data cells stay on one line so part numbers, prices,
+     qty don't break across lines. Description (col 2) is allowed to
+     wrap. Headers wrap freely so a long label like "QTY PER ASSEMBLY"
+     doesn't force its column wider than it needs to be. */
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr > td {
+    white-space: nowrap;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr > td:nth-child(2) {
+    white-space: normal;
+    min-width: 140px;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList tbody > tr > td:nth-child(1) {
+    width: 48px;
+    text-align: center;
+  }
+  #yamaha-oem-AssemblyContainer #PartsList thead th {
+    white-space: normal !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    vertical-align: bottom;
   }
 
   /* Quantity input */
