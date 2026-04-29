@@ -48,6 +48,11 @@ services:
       - key: SITE_URL
         # Update to https://www.twowheelobsession.com.au once the custom domain is wired up.
         value: https://twowo-site.onrender.com
+      # Yamaha OEM Parts Finder — paid EPC Online subscription
+      - key: EPC_DEALER_ID
+        value: 26ea01c9-ab51-41f3-8297-7adbde8fe872
+      - key: EPC_PRODUCT_KEY_YAMAHA
+        value: 324d31df-d5ab-4449-85a7-43e5a97c3e28
 
   - type: cron
     name: twowo-yamaha-sync
