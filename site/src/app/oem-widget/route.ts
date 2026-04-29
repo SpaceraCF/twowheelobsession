@@ -120,20 +120,49 @@ function buildWidgetHtml(accessKey: string) {
     background: var(--bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 12px !important;
-    padding: 20px !important;
+    padding: 16px 20px !important;
     margin: 0 auto 24px !important;
     height: auto !important;
     width: 100% !important;
     box-shadow: var(--shadow);
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 14px;
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 14px 18px;
   }
 
-  #yamaha-oem-filterpanel > div {
+  /* Title block — sits left of "1. Year" */
+  #yamaha-oem-filtertitle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding-right: 18px;
+    border-right: 1px solid var(--line);
+    flex: 0 0 auto;
+  }
+  #yamaha-oem-filtertitle .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  #yamaha-oem-filtertitle .title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Dropdown cells flex to fill remaining space */
+  #yamaha-oem-filterpanel > div:not(#yamaha-oem-filtertitle) {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    flex: 1 1 165px;
+    min-width: 150px;
   }
 
   /* Auto-labels for each step using ::before */
@@ -141,13 +170,25 @@ function buildWidgetHtml(accessKey: string) {
   #ModelSelection::before   { content: '2. Model'; }
   #ContentSelection::before { content: '3. Section'; }
   #AssemblySelection::before { content: '4. Assembly'; }
-  #TypeSelection::before    { content: 'Type'; display: none; } /* hidden when single type */
-  #yamaha-oem-filterpanel > div::before {
+  /* We always run single-type (MB / Motorcycles), so hide the type slot. */
+  #TypeSelection { display: none !important; }
+  #yamaha-oem-filterpanel > div:not(#yamaha-oem-filtertitle)::before {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ink-soft);
+  }
+
+  @media (max-width: 720px) {
+    #yamaha-oem-filtertitle {
+      flex: 1 1 100%;
+      padding-right: 0;
+      padding-bottom: 12px;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    #yamaha-oem-filtertitle .title { white-space: normal; }
   }
 
   #yamaha-oem-filterpanel select {
@@ -366,6 +407,10 @@ function buildWidgetHtml(accessKey: string) {
 <body>
 <div id="yamaha-oem-parts-lookup">
   <div id="yamaha-oem-filterpanel">
+    <div id="yamaha-oem-filtertitle">
+      <span class="eyebrow">Genuine Yamaha</span>
+      <span class="title">OEM Parts Finder</span>
+    </div>
     <div id="TypeSelection"><select id="TypeSelect" name="TypeSelect"></select></div>
     <div id="YearSelection"><select id="YearSelect" name="YearSelect"></select></div>
     <div id="ModelSelection"><select id="ModelSelect" name="ModelSelect"></select></div>
