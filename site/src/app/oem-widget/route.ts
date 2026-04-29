@@ -110,9 +110,9 @@ function buildWidgetHtml(accessKey: string) {
   }
 
   #yamaha-oem-parts-lookup {
-    max-width: 1280px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 24px 20px 48px;
+    padding: 24px 24px 48px;
   }
 
   /* ---------- Step / filter panel ---------- */
@@ -228,9 +228,12 @@ function buildWidgetHtml(accessKey: string) {
 
   @media (min-width: 1024px) {
     #yamaha-oem-AssemblyContainer {
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-areas: "parts diagram";
       align-items: start;
     }
+    #PartsListContainer { grid-area: parts; }
+    #Diagram { grid-area: diagram; }
   }
 
   #Diagram {
@@ -241,11 +244,31 @@ function buildWidgetHtml(accessKey: string) {
     box-shadow: var(--shadow);
     margin: 0 !important;
     min-height: 320px;
+    overflow: hidden;
+    position: relative;
+    min-width: 0;
   }
   #newCanvas {
     width: 100% !important;
+    max-width: 100%;
     overflow: hidden;
     border-radius: 8px;
+    position: relative; /* containing block for the leaflet viewport so overflow clips it */
+  }
+  /* The base yamaha.css sets #imgScaler { width:auto; max-height:1200px }
+     at viewport >= 1400px, which renders the image wider than the column
+     and overlaps the parts table. Force fit-to-container — imgViewer2
+     reads the image's CSS size at load and pan/zoom still works. */
+  #newCanvas #imgScaler {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block;
+  }
+  #newCanvas .viewport,
+  #newCanvas .leaflet-container {
+    max-width: 100% !important;
   }
 
   #PartsListContainer {
