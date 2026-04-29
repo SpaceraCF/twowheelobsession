@@ -12,8 +12,10 @@ export function SiteFooter() {
 }
 
 function PaymentPromoBanner() {
+  // Background matches the exact navy in the banner image (sampled #02023f),
+  // so the wrapper extends seamlessly on screens wider than the image.
   return (
-    <section className="bg-[#0a1f4f]">
+    <section className="bg-[#02023f]">
       <div className="max-w-[1400px] mx-auto">
         <Image
           src="/own-it-now-pay-later.png"

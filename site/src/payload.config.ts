@@ -46,6 +46,11 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    // Auto-push schema diffs at boot — including in production. Suitable for
+    // small-team v1 where there's no separate ops review of migrations. Switch
+    // to file-based migrations (`npm run migrate:create` / `npm run migrate`)
+    // before any destructive schema change goes through prod.
+    push: true,
   }),
   sharp,
 })

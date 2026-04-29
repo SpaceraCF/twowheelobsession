@@ -36,13 +36,13 @@ export function NewsCards() {
               href={item.href}
               className="group block bg-white border border-zinc-200 hover:shadow-lg transition-shadow overflow-hidden"
             >
-              <div className="aspect-[4/3] bg-zinc-100 relative overflow-hidden">
+              <div className="aspect-square bg-white relative overflow-hidden">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-contain group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-6">

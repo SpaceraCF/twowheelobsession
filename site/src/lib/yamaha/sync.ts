@@ -8,6 +8,7 @@ import {
   type YamahaDetail,
   type YamahaSummary,
 } from './client'
+import { seedYamahaBaseline } from './seed'
 
 export type SyncResult = {
   fetchedSummaries: number
@@ -33,9 +34,14 @@ export async function syncYamahaBikes(): Promise<SyncResult> {
     durationMs: 0,
   }
 
-  const yamahaBrand = await findBrandIdBySlug(payload, 'yamaha')
+  let yamahaBrand = await findBrandIdBySlug(payload, 'yamaha')
   if (!yamahaBrand) {
-    throw new Error('Yamaha brand not found. Run seed first (POST /api/internal/yamaha-seed).')
+    // First run after deploy — auto-seed brands + base categories.
+    await seedYamahaBaseline()
+    yamahaBrand = await findBrandIdBySlug(payload, 'yamaha')
+    if (!yamahaBrand) {
+      throw new Error('Yamaha brand still missing after seed — check the seed function.')
+    }
   }
 
   const summaries = await getMotorcycleSummaries()
