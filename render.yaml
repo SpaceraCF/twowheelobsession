@@ -89,8 +89,11 @@ services:
     region: singapore
     plan: starter
     rootDir: site
-    # Hourly, 5 mins past the hour. Cheap (a sync run takes ~10 sec).
-    schedule: "5 * * * *"
+    # Daily refresh at 6am Sydney time. Render's cron is UTC, so 19:00 UTC
+    # = 06:00 AEDT (summer) / 05:00 AEST (winter). Close enough — bikes
+    # don't change often. Bump to hourly if Yamaha pricing volatility
+    # ever becomes an issue.
+    schedule: "0 19 * * *"
     buildCommand: "echo no build needed"
     startCommand: node scripts/sync-yamaha-cron.mjs
     envVarGroups:
