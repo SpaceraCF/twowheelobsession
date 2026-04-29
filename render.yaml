@@ -18,7 +18,9 @@ services:
     region: singapore
     plan: starter
     rootDir: site
-    buildCommand: npm ci && npm run build
+    # NODE_ENV=production at runtime is fine, but the build needs devDependencies
+    # (tailwindcss, @tailwindcss/postcss, typescript). --include=dev forces them.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /
     autoDeploy: true
