@@ -1,0 +1,152 @@
+"use client"
+
+import { useActionState, useEffect, useState } from "react"
+import { useFormStatus } from "react-dom"
+import { useSearchParams } from "next/navigation"
+
+import { submitEnquiry, type EnquiryState } from "@/lib/actions/enquiry"
+
+const TYPES = [
+  { value: "new-bike", label: "New bike enquiry" },
+  { value: "used-bike", label: "Used bike enquiry" },
+  { value: "parts", label: "Parts & accessories" },
+  { value: "general", label: "General" },
+]
+
+export function EnquiryForm() {
+  const params = useSearchParams()
+  const [type, setType] = useState<string>("general")
+  const [subject, setSubject] = useState<string>("")
+  const [pageUrl, setPageUrl] = useState<string>("")
+  const [state, formAction] = useActionState<EnquiryState | null, FormData>(submitEnquiry, null)
+
+  useEffect(() => {
+    const t = params.get("type")
+    if (t && TYPES.some((x) => x.value === t)) setType(t)
+    const bike = params.get("bike")
+    const stock = params.get("stock")
+    if (bike) {
+      setSubject(stock ? `${bike} (Stock #${stock})` : `${bike}`)
+    }
+    if (typeof window !== "undefined") {
+      setPageUrl(window.location.href)
+    }
+  }, [params])
+
+  if (state?.ok) {
+    return (
+      <div className="bg-emerald-50 border border-emerald-200 p-8 text-center">
+        <h3 className="text-xl font-semibold text-emerald-900">Thanks — message sent</h3>
+        <p className="mt-3 text-emerald-800">
+          We'll be in touch shortly. For urgent enquiries call{" "}
+          <a href="tel:+61243319007" className="font-semibold underline">
+            (02) 4331 9007
+          </a>
+          .
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <form action={formAction} className="grid gap-5 bg-white border border-zinc-200 p-6 md:p-8">
+      {state?.error && !state.fieldErrors && (
+        <p className="text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+          {state.error}
+        </p>
+      )}
+
+      <div>
+        <label htmlFor="type" className="block text-sm font-medium text-zinc-900">
+          What's your enquiry about? <span className="text-red-600">*</span>
+        </label>
+        <select
+          id="type"
+          name="type"
+          required
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+        >
+          {TYPES.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Your name" name="name" required error={state?.fieldErrors?.name} />
+        <Field label="Email" name="email" type="email" required error={state?.fieldErrors?.email} />
+        <Field label="Phone" name="phone" type="tel" />
+        <Field label="Subject" name="subject" defaultValue={subject} />
+      </div>
+
+      <div>
+        <label htmlFor="message" className="block text-sm font-medium text-zinc-900">
+          Message <span className="text-red-600">*</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          required
+          rows={6}
+          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+        />
+        {state?.fieldErrors?.message && (
+          <p className="mt-1 text-xs text-red-700">{state.fieldErrors.message}</p>
+        )}
+      </div>
+
+      <input type="hidden" name="pageUrl" value={pageUrl} />
+
+      <SubmitButton />
+    </form>
+  )
+}
+
+function Field({
+  label,
+  name,
+  type = "text",
+  required,
+  error,
+  defaultValue,
+}: {
+  label: string
+  name: string
+  type?: string
+  required?: boolean
+  error?: string
+  defaultValue?: string
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className="block text-sm font-medium text-zinc-900">
+        {label}
+        {required && <span className="text-red-600"> *</span>}
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required={required}
+        defaultValue={defaultValue}
+        className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+      />
+      {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
+    </div>
+  )
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex h-12 items-center px-6 bg-red-600 text-white font-semibold uppercase text-sm tracking-wider hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed self-start"
+    >
+      {pending ? "Sending…" : "Send enquiry"}
+    </button>
+  )
+}
