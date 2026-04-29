@@ -43,6 +43,8 @@ services:
       name: twowo-media
       mountPath: /var/data/media
       sizeGB: 5
+    envVarGroups:
+      - twowo-shared
     envVars:
       - key: NODE_VERSION
         value: "22"
@@ -54,7 +56,6 @@ services:
           property: connectionString
       - key: PAYLOAD_SECRET
         generateValue: true
-      - fromGroup: twowo-shared
       - key: FEED_SECRET
         generateValue: true
       - key: PAYLOAD_MEDIA_DIR
@@ -92,6 +93,8 @@ services:
     schedule: "5 * * * *"
     buildCommand: "echo no build needed"
     startCommand: node scripts/sync-yamaha-cron.mjs
+    envVarGroups:
+      - twowo-shared
     envVars:
       - key: NODE_VERSION
         value: "22"
@@ -100,4 +103,3 @@ services:
           name: twowo-site
           type: web
           envVarKey: SITE_URL
-      - fromGroup: twowo-shared
