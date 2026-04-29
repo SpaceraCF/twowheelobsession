@@ -25,6 +25,9 @@ export function BikeCard({ bike, hrefBase = "/new-bikes" }: { bike: NewBike; hre
             src={externalImageUrl}
             alt={displayName}
             fill
+            // Yamaha CDN images include weird URL shapes (port 443 explicit,
+            // .ashx extension). Skip Next/Image optimizer — let the browser fetch direct.
+            unoptimized
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />

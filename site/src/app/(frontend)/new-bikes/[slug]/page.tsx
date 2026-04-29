@@ -96,6 +96,7 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
               alt={bike.displayName}
               fill
               priority
+              unoptimized
               sizes="(min-width: 1024px) 60vw, 100vw"
               className="object-contain"
             />
