@@ -42,7 +42,7 @@ export function NewsCards() {
                   alt={item.title}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-contain group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-6">
