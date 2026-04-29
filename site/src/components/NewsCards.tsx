@@ -7,6 +7,7 @@ const ITEMS = [
     title: "The all-new CFMOTO 1000MT-X",
     body: "Pre-order yours today.",
     href: "/new-bikes?brand=cfmoto",
+    fit: "cover" as const,
   },
   {
     image: "/news/finance-1pc.jpg",
@@ -42,7 +43,7 @@ export function NewsCards() {
                   alt={item.title}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className={`${item.fit === "cover" ? "object-cover" : "object-contain"} group-hover:scale-105 transition-transform duration-500`}
                 />
               </div>
               <div className="p-6">
