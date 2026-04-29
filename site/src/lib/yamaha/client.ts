@@ -62,7 +62,14 @@ export function getProductById(id: number) {
   return getJson<YamahaDetail>(`${BASE}/GetProductByID/${id}`)
 }
 
-export type YamahaColor = { Code?: string; Name?: string; ImageUrl?: string }
+export type YamahaColor = {
+  Id?: number
+  ProductId?: number
+  ColorName?: string
+  ColorCode?: string
+  ColorImage?: string
+  Active?: boolean
+}
 export function getProductColors(id: number) {
   return getJson<YamahaColor[]>(`${BASE}/GetProductColors/${id}`)
 }

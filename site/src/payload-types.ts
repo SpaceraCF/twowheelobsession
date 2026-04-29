@@ -329,6 +329,10 @@ export interface NewBike {
          */
         hex?: string | null;
         image?: (number | null) | Media;
+        /**
+         * External per-colour image URL (e.g. from Yamaha API). Used until image is downloaded into Media.
+         */
+        imageUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -842,6 +846,7 @@ export interface NewBikesSelect<T extends boolean = true> {
         name?: T;
         hex?: T;
         image?: T;
+        imageUrl?: T;
         id?: T;
       };
   brochureUrl?: T;

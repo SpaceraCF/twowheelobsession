@@ -167,14 +167,19 @@ function cleanImageUrl(url: string | null | undefined): string | undefined {
 }
 
 function extractColors(detail: YamahaDetail, colors: YamahaColor[]) {
-  const byName = new Map<string, string | undefined>()
+  type ColorMeta = { hex?: string; imageUrl?: string }
+  const byName = new Map<string, ColorMeta>()
   for (const c of colors) {
-    const name = c.Name?.trim()
+    if (c.Active === false) continue
+    const name = c.ColorName?.trim()
     if (!name) continue
-    byName.set(name.toLowerCase(), cleanImageUrl(c.ImageUrl))
+    byName.set(name.toLowerCase(), {
+      hex: c.ColorCode?.trim() || undefined,
+      imageUrl: cleanImageUrl(c.ColorImage),
+    })
   }
 
-  const out: Array<{ name: string; imageUrl?: string }> = []
+  const out: Array<{ name: string; hex?: string; imageUrl?: string }> = []
   const seen = new Set<string>()
   for (let i = 1; i <= 10; i++) {
     const raw = (detail as unknown as Record<string, string | null>)[`Colour${i}`]
@@ -183,17 +188,23 @@ function extractColors(detail: YamahaDetail, colors: YamahaColor[]) {
     const key = name.toLowerCase()
     if (seen.has(key)) continue
     seen.add(key)
-    out.push({ name, imageUrl: byName.get(key) })
+    const meta = byName.get(key)
+    out.push({ name, hex: meta?.hex, imageUrl: meta?.imageUrl })
   }
 
   // Include any colours from the colours endpoint that weren't in the detail list.
   for (const c of colors) {
-    const name = c.Name?.trim()
+    if (c.Active === false) continue
+    const name = c.ColorName?.trim()
     if (!name) continue
     const key = name.toLowerCase()
     if (seen.has(key)) continue
     seen.add(key)
-    out.push({ name, imageUrl: cleanImageUrl(c.ImageUrl) })
+    out.push({
+      name,
+      hex: c.ColorCode?.trim() || undefined,
+      imageUrl: cleanImageUrl(c.ColorImage),
+    })
   }
 
   return out
