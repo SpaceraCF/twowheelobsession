@@ -1,4 +1,4 @@
-import { getPayload } from "payload"
+import { getPayload, type Where } from "payload"
 import config from "@payload-config"
 
 import { BikeCard } from "@/components/BikeCard"
@@ -29,7 +29,7 @@ export default async function NewBikesPage({ searchParams }: { searchParams: Sea
     ? categories.docs.find((c) => (c as { slug?: string }).slug === params.category)
     : undefined
 
-  const where: Record<string, unknown> = {
+  const where: Where = {
     status: { equals: "available" },
   }
   if (selectedBrand) where.brand = { equals: selectedBrand.id }
@@ -51,29 +51,21 @@ export default async function NewBikesPage({ searchParams }: { searchParams: Sea
     depth: 0,
   })
 
-  const brandCounts = new Map<string | number, number>()
-  const categoryCounts = new Map<string | number, number>()
-  for (const b of allBikes.docs as Array<Record<string, unknown>>) {
-    if (b.brand) brandCounts.set(b.brand as string | number, (brandCounts.get(b.brand as string | number) ?? 0) + 1)
-    if (b.category)
-      categoryCounts.set(
-        b.category as string | number,
-        (categoryCounts.get(b.category as string | number) ?? 0) + 1,
-      )
+  const brandCounts = new Map<number, number>()
+  const categoryCounts = new Map<number, number>()
+  for (const b of allBikes.docs) {
+    const brandId = typeof b.brand === "object" ? b.brand?.id : b.brand
+    const categoryId = typeof b.category === "object" ? b.category?.id : b.category
+    if (brandId != null) brandCounts.set(brandId, (brandCounts.get(brandId) ?? 0) + 1)
+    if (categoryId != null) categoryCounts.set(categoryId, (categoryCounts.get(categoryId) ?? 0) + 1)
   }
 
   const brandOptions = brands.docs
-    .map((b) => {
-      const r = b as { id: string | number; name: string; slug: string }
-      return { label: r.name, value: r.slug, count: brandCounts.get(r.id) ?? 0 }
-    })
+    .map((b) => ({ label: b.name, value: b.slug, count: brandCounts.get(b.id) ?? 0 }))
     .filter((o) => o.count > 0)
 
   const categoryOptions = categories.docs
-    .map((c) => {
-      const r = c as { id: string | number; name: string; slug: string }
-      return { label: r.name, value: r.slug, count: categoryCounts.get(r.id) ?? 0 }
-    })
+    .map((c) => ({ label: c.name, value: c.slug, count: categoryCounts.get(c.id) ?? 0 }))
     .filter((o) => o.count > 0)
     .sort((a, b) => b.count - a.count)
 
@@ -103,7 +95,7 @@ export default async function NewBikesPage({ searchParams }: { searchParams: Sea
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {bikes.docs.map((bike) => (
-                <BikeCard key={String((bike as { id: string | number }).id)} bike={bike as Record<string, unknown>} />
+                <BikeCard key={bike.id} bike={bike} />
               ))}
             </div>
           )}

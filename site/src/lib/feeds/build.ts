@@ -70,8 +70,7 @@ export async function buildBikesalesFeed(): Promise<FeedPayload> {
   })
 
   const entries: FeedEntry[] = []
-  for (const raw of result.docs) {
-    const bike = raw as Record<string, unknown>
+  for (const bike of result.docs as unknown as Array<Record<string, unknown>>) {
     const brand = bike.brand as { name?: string; slug?: string } | null
     const photos = (bike.photos as Array<{ image?: { url?: string }; caption?: string }> | undefined) ?? []
 

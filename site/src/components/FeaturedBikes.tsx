@@ -34,8 +34,8 @@ export async function FeaturedBikes() {
           </Link>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {result.docs.map((bike: Record<string, unknown>) => (
-            <BikeCard key={String(bike.id)} bike={bike} />
+          {result.docs.map((bike) => (
+            <BikeCard key={bike.id} bike={bike} />
           ))}
         </div>
       </div>

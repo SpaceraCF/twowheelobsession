@@ -1,20 +1,21 @@
 import Image from "next/image"
 import Link from "next/link"
 
-type UsedBike = Record<string, unknown>
+import type { UsedBike } from "@/payload-types"
 
 export function UsedBikeCard({ bike }: { bike: UsedBike }) {
-  const slug = String(bike.slug ?? "")
-  const displayName = String(bike.displayName ?? "Untitled")
-  const year = bike.year as number | undefined
-  const kms = bike.kms as number | undefined
-  const price = bike.price as number | undefined
-  const priceLabel = bike.priceLabel as string | undefined
-  const status = bike.listingStatus as string | undefined
-  const photos = (bike.photos as Array<{ image?: { url?: string } }> | undefined) ?? []
-  const photoUrl = photos[0]?.image?.url
-  const brand = (bike.brand as { name?: string } | undefined)?.name
-  const stockNumber = bike.stockNumber as string | undefined
+  const slug = bike.slug ?? ""
+  const displayName = bike.displayName ?? "Untitled"
+  const kms = bike.kms ?? undefined
+  const price = bike.price ?? undefined
+  const priceLabel = bike.priceLabel ?? undefined
+  const status = bike.listingStatus ?? undefined
+  const photos = bike.photos ?? []
+  const firstPhoto = photos[0]
+  const photoUrl =
+    firstPhoto && typeof firstPhoto.image === "object" ? firstPhoto.image.url : undefined
+  const brandName = typeof bike.brand === "object" && bike.brand ? bike.brand.name : undefined
+  const stockNumber = bike.stockNumber ?? undefined
 
   return (
     <Link
@@ -43,7 +44,7 @@ export function UsedBikeCard({ bike }: { bike: UsedBike }) {
       </div>
       <div className="p-4">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-          {brand}
+          {brandName}
           {stockNumber ? ` · #${stockNumber}` : ""}
         </p>
         <h3 className="mt-1 font-semibold text-base text-zinc-900">{displayName}</h3>

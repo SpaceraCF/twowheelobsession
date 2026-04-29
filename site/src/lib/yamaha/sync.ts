@@ -123,8 +123,8 @@ async function findOrCreateCategoryFromYamaha(payload: Payload, summary: YamahaS
 function mapYamahaToNewBike(args: {
   summary: YamahaSummary
   detail: YamahaDetail
-  brandId: string | number
-  categoryId: string | number
+  brandId: number
+  categoryId: number
 }) {
   const { summary, detail, brandId, categoryId } = args
   return {

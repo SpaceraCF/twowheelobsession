@@ -228,9 +228,9 @@ export async function seedUsedBikes(): Promise<UsedSeedResult> {
 }
 
 async function loadBrandIds(payload: Payload) {
-  const map = new Map<string, string | number>()
+  const map = new Map<string, number>()
   const res = await payload.find({ collection: "brands", limit: 50, depth: 0 })
-  for (const b of res.docs as Array<{ id: string | number; slug: string }>) {
+  for (const b of res.docs) {
     map.set(b.slug, b.id)
   }
   return map

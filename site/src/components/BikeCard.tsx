@@ -1,17 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
 
-type Bike = Record<string, unknown>
+import type { NewBike } from "@/payload-types"
 
-export function BikeCard({ bike, hrefBase = "/new-bikes" }: { bike: Bike; hrefBase?: string }) {
-  const slug = String(bike.slug ?? "")
-  const displayName = String(bike.displayName ?? "Untitled")
-  const year = bike.year as number | undefined
-  const externalImageUrl = bike.externalImageUrl as string | undefined
-  const tagline = bike.tagline as string | undefined
-  const brand = (bike.brand as { name?: string } | undefined)?.name
-  const category = (bike.category as { name?: string } | undefined)?.name
-  const price = bike.price as number | undefined
+export function BikeCard({ bike, hrefBase = "/new-bikes" }: { bike: NewBike; hrefBase?: string }) {
+  const slug = bike.slug ?? ""
+  const displayName = bike.displayName ?? "Untitled"
+  const year = bike.year ?? undefined
+  const externalImageUrl = bike.externalImageUrl ?? undefined
+  const tagline = bike.tagline ?? undefined
+  const brandName = typeof bike.brand === "object" && bike.brand ? bike.brand.name : undefined
+  const categoryName =
+    typeof bike.category === "object" && bike.category ? bike.category.name : undefined
+  const price = bike.price ?? undefined
 
   return (
     <Link
@@ -35,15 +36,14 @@ export function BikeCard({ bike, hrefBase = "/new-bikes" }: { bike: Bike; hrefBa
       </div>
       <div className="p-4">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-          {brand}
-          {category ? ` · ${category}` : ""}
+          {brandName}
+          {categoryName ? ` · ${categoryName}` : ""}
         </p>
         <h3 className="mt-1 font-semibold text-base text-zinc-900">
-          {year} {displayName}
+          {year ? `${year} ` : ""}
+          {displayName}
         </h3>
-        {tagline ? (
-          <p className="mt-1 text-sm text-zinc-600 line-clamp-1">{tagline}</p>
-        ) : null}
+        {tagline ? <p className="mt-1 text-sm text-zinc-600 line-clamp-1">{tagline}</p> : null}
         {price ? (
           <p className="mt-2 text-sm font-semibold text-red-600">
             ${price.toLocaleString("en-AU")}
