@@ -5,6 +5,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { migrations } from './migrations/index.ts'
 import { BikeCategories } from './collections/BikeCategories.ts'
 import { Brands } from './collections/Brands.ts'
 import { Enquiries } from './collections/Enquiries.ts'
@@ -46,11 +47,13 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
-    // Auto-push schema diffs at boot — including in production. Suitable for
-    // small-team v1 where there's no separate ops review of migrations. Switch
-    // to file-based migrations (`npm run migrate:create` / `npm run migrate`)
-    // before any destructive schema change goes through prod.
-    push: true,
+    // Dev: schema diffs auto-pushed (Drizzle's "push" mode, default in non-prod).
+    // Prod: migrations from src/migrations/ run automatically at boot.
+    //
+    // To add a new migration after schema changes:
+    //   npm run migrate:create <name>
+    // Then commit the generated files in src/migrations/.
+    prodMigrations: migrations,
   }),
   sharp,
 })
