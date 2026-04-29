@@ -1,6 +1,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { resendAdapter } from '@payloadcms/email-resend'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import nodemailer from 'nodemailer'
 import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -40,15 +41,24 @@ export default buildConfig({
     Pages,
   ],
   editor: lexicalEditor(),
-  // Email: Resend if RESEND_API_KEY is set, otherwise Payload writes to
-  // console (default). RESEND_FROM_EMAIL must be on a domain you've
-  // verified with Resend; until then, Resend's onboarding@resend.dev
-  // works as a sender.
-  email: process.env.RESEND_API_KEY
-    ? resendAdapter({
-        apiKey: process.env.RESEND_API_KEY,
-        defaultFromAddress: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-        defaultFromName: process.env.RESEND_FROM_NAME || 'Two Wheel Obsession',
+  // Email: SendGrid via nodemailer SMTP relay if SENDGRID_API_KEY is set,
+  // otherwise Payload writes to console (default). The SendGrid SMTP
+  // username is the literal string "apikey"; the password is the API key.
+  // EMAIL_FROM_ADDRESS must be a verified Single Sender or on a verified
+  // domain in SendGrid.
+  email: process.env.SENDGRID_API_KEY
+    ? nodemailerAdapter({
+        defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'enquiries@twowheelobsession.com.au',
+        defaultFromName: process.env.EMAIL_FROM_NAME || 'Two Wheel Obsession',
+        transport: nodemailer.createTransport({
+          host: 'smtp.sendgrid.net',
+          port: 587,
+          secure: false,
+          auth: {
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY,
+          },
+        }),
       })
     : undefined,
   secret: process.env.PAYLOAD_SECRET || '',

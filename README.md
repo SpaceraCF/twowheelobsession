@@ -75,14 +75,20 @@ Single-command deploy via Blueprint.
      https://twowo-site.onrender.com/api/internal/yamaha-sync
    ```
 
-### Custom domain
+### Custom domain (via Cloudflare)
 
-Once `www.twowheelobsession.com.au` is ready to cut over:
+Plan is to use Cloudflare for DNS. When ready:
 
-1. Render dashboard → `twowo-site` → **Settings** → **Custom Domains** → add `twowheelobsession.com.au` and `www.twowheelobsession.com.au`.
-2. Update DNS at the registrar (CNAME or A records per Render's instructions).
-3. Render auto-provisions Let's Encrypt certs.
+1. Render dashboard → `twowo-site` → **Settings** → **Custom Domains** → add `twowheelobsession.com.au` and `www.twowheelobsession.com.au`. Render gives you a CNAME target (e.g. `twowo-site.onrender.com`).
+2. Cloudflare dashboard → DNS → add records:
+   - `CNAME www → twowo-site.onrender.com` (proxied: orange cloud OK if you want CDN; grey cloud if not)
+   - `CNAME @  → twowo-site.onrender.com` (apex-flatten via CNAME — Cloudflare handles this)
+3. Render auto-provisions Let's Encrypt certs. With Cloudflare proxy on, set Cloudflare SSL mode to **Full (strict)**.
 4. **Update `SITE_URL`** env var on `twowo-site` to `https://www.twowheelobsession.com.au`. The cron and bikesales feed both pick this up automatically.
+
+**SendGrid domain auth** — once the domain is on Cloudflare, go to SendGrid → Sender Authentication → Authenticate Your Domain, pick Cloudflare from the DNS host list, and add the SPF + DKIM CNAME records SendGrid gives you. After verification, change `EMAIL_FROM_ADDRESS` to a real address on the domain (`enquiries@twowheelobsession.com.au` etc.). Until then SendGrid will only send from a verified Single Sender.
+
+**Future option — Cloudflare R2 for media** — current setup uses a 5GB Render persistent disk for Payload media uploads. If/when storage grows, migrate to Cloudflare R2 (free egress, ~$0.015/GB/month) via Payload's `@payloadcms/storage-s3` plugin pointed at R2's S3-compatible endpoint.
 
 ### Subsequent deploys
 
