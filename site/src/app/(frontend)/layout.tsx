@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
 import { Inter, Bebas_Neue } from "next/font/google"
 
+import { JsonLd } from "@/components/JsonLd"
 import { SiteHeader } from "@/components/SiteHeader"
 import { SiteFooter } from "@/components/SiteFooter"
+import { mainDealerJsonLd, websiteJsonLd } from "@/lib/seo/jsonld"
 
 import "./globals.css"
 
@@ -58,6 +60,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${display.variable}`}>
       <body className="min-h-screen flex flex-col bg-[--color-bg] text-[--color-ink]">
+        <JsonLd data={mainDealerJsonLd()} />
+        <JsonLd
+          data={websiteJsonLd({
+            url: "https://www.twowheelobsession.com.au",
+            name: "Two Wheel Obsession",
+          })}
+        />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

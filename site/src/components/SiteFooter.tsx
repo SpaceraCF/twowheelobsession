@@ -120,6 +120,18 @@ function FooterMain() {
             />
           </Link>
           <div>
+            <h4 className="text-zinc-900 font-semibold text-lg">Parts shipped Australia-wide</h4>
+            <p className="mt-2 text-sm text-zinc-700 leading-relaxed">
+              Need genuine Yamaha parts shipped? Visit our dedicated parts store.
+            </p>
+            <a
+              href="https://yamahapartsaustralia.com.au"
+              className="mt-2 inline-block text-sm font-semibold text-red-600 hover:underline"
+            >
+              yamahapartsaustralia.com.au →
+            </a>
+          </div>
+          <div>
             <h4 className="text-zinc-900 font-semibold text-lg">My Account</h4>
             <ul className="mt-3 text-sm space-y-2 text-zinc-700">
               <li>
