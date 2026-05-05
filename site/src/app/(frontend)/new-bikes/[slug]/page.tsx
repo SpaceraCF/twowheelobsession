@@ -4,6 +4,7 @@ import { getPayload } from "payload"
 import config from "@payload-config"
 
 import { BikeShowcase, type BikeGalleryColor } from "@/components/BikeGallery"
+import { FinanceCallout } from "@/components/FinanceCallout"
 
 type Params = Promise<{ slug: string }>
 
@@ -141,6 +142,8 @@ export default async function NewBikeDetailPage({ params }: { params: Params }) 
             )}
           </p>
         )}
+
+        <FinanceCallout bikeName={bike.displayName} price={bike.price} />
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link

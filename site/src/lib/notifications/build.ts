@@ -6,6 +6,7 @@ const ADMIN_BASE = (process.env.SITE_URL || "http://localhost:3000").replace(/\/
 const ENQUIRY_LABELS: Record<string, string> = {
   "new-bike": "New bike enquiry",
   "used-bike": "Used bike enquiry",
+  finance: "Finance enquiry",
   parts: "Parts & accessories",
   general: "General enquiry",
 }
@@ -33,6 +34,21 @@ export function buildEnquiryEmail(doc: Record<string, unknown>) {
   ]
   if (doc.phone) lines.push(`Phone:   ${doc.phone}`)
   if (doc.subject) lines.push(`Subject: ${doc.subject}`)
+
+  if (type === "finance") {
+    lines.push("")
+    lines.push("Finance details:")
+    if (doc.financeDeposit != null) {
+      const dep = Number(doc.financeDeposit)
+      lines.push(`  Deposit available: A$${Number.isFinite(dep) ? dep.toLocaleString("en-AU") : doc.financeDeposit}`)
+    }
+    if (doc.financeTradeIn) lines.push(`  Trade-in: ${doc.financeTradeIn}`)
+    if (doc.financeTerm) lines.push(`  Preferred term: ${doc.financeTerm} months`)
+    if (doc.financeDeposit == null && !doc.financeTradeIn && !doc.financeTerm) {
+      lines.push("  (none provided)")
+    }
+  }
+
   lines.push("")
   lines.push("Message:")
   lines.push(String(doc.message ?? ""))

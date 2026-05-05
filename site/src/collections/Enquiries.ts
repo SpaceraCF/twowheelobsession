@@ -38,6 +38,7 @@ export const Enquiries: CollectionConfig = {
       options: [
         { label: 'New bike enquiry', value: 'new-bike' },
         { label: 'Used bike enquiry', value: 'used-bike' },
+        { label: 'Finance enquiry', value: 'finance' },
         { label: 'Parts & accessories', value: 'parts' },
         { label: 'General', value: 'general' },
       ],
@@ -51,13 +52,47 @@ export const Enquiries: CollectionConfig = {
       name: 'newBike',
       type: 'relationship',
       relationTo: 'new-bikes',
-      admin: { condition: (data) => data?.type === 'new-bike' },
+      admin: { condition: (data) => data?.type === 'new-bike' || data?.type === 'finance' },
     },
     {
       name: 'usedBike',
       type: 'relationship',
       relationTo: 'used-bikes',
-      admin: { condition: (data) => data?.type === 'used-bike' },
+      admin: { condition: (data) => data?.type === 'used-bike' || data?.type === 'finance' },
+    },
+    // Finance-specific fields. Manual workflow initially — staff
+    // contact the customer and route to the finance partner (YMF /
+    // ZIP for bikes). Phase 2: automate the partner submission.
+    {
+      name: 'financeDeposit',
+      type: 'number',
+      admin: {
+        condition: (data) => data?.type === 'finance',
+        description: 'Deposit amount available, in AUD. Optional.',
+      },
+    },
+    {
+      name: 'financeTradeIn',
+      type: 'text',
+      admin: {
+        condition: (data) => data?.type === 'finance',
+        description: 'Customer-supplied trade-in details, if any.',
+      },
+    },
+    {
+      name: 'financeTerm',
+      type: 'select',
+      options: [
+        { label: '24 months', value: '24' },
+        { label: '36 months', value: '36' },
+        { label: '48 months', value: '48' },
+        { label: '60 months', value: '60' },
+        { label: '72 months', value: '72' },
+      ],
+      admin: {
+        condition: (data) => data?.type === 'finance',
+        description: 'Customer\'s preferred term, if specified.',
+      },
     },
     { name: 'pageUrl', type: 'text', admin: { description: 'URL the form was submitted from.' } },
     { name: 'userAgent', type: 'text', admin: { readOnly: true } },

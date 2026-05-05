@@ -1,17 +1,27 @@
 import Image from "next/image"
 import Link from "next/link"
 
+// Site-wide footer. Note: the "Own it now, pay later" banner is no
+// longer rendered here — Zip and Afterpay only apply to parts &
+// accessories, not bikes (bikes go through finance enquiry instead).
+// Pages that should show the banner import `PaymentPromoBanner`
+// directly and render it above the footer in their own JSX.
 export function SiteFooter() {
   return (
     <footer className="mt-16">
-      <PaymentPromoBanner />
       <FooterMain />
       <FooterBottomBar />
     </footer>
   )
 }
 
-function PaymentPromoBanner() {
+/**
+ * "Own it now, pay later" promo for parts/accessories pages. NOT for
+ * bike pages — Zip and Afterpay don't apply to bike purchases.
+ * Render this just above `<SiteFooter />` on pages where the messaging
+ * is appropriate (home, OEM Parts Finder, contact-us general).
+ */
+export function PaymentPromoBanner() {
   // Background matches the exact navy in the banner image (sampled #02023f),
   // so the wrapper extends seamlessly on screens wider than the image.
   return (
@@ -19,12 +29,18 @@ function PaymentPromoBanner() {
       <div className="max-w-[1400px] mx-auto">
         <Image
           src="/own-it-now-pay-later.png"
-          alt="Own it now, pay later — interest free always, flexible payments with Afterpay, Zip and PayPal"
+          alt="Own it now, pay later on parts & accessories — interest free always, flexible payments with Afterpay, Zip and PayPal. Bikes are not eligible — see finance options on each bike page."
           width={2048}
           height={501}
           className="w-full h-auto"
           sizes="(min-width: 1400px) 1400px, 100vw"
         />
+        <p className="text-center text-xs text-white/70 px-4 pb-3 -mt-1">
+          Pay-later options apply to parts &amp; accessories.{" "}
+          <Link href="/new-bikes" className="underline hover:text-white">
+            For bike finance, see each bike page.
+          </Link>
+        </p>
       </div>
     </section>
   )

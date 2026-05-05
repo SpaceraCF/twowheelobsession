@@ -4,6 +4,8 @@ import { notFound } from "next/navigation"
 import { getPayload } from "payload"
 import config from "@payload-config"
 
+import { FinanceCallout } from "@/components/FinanceCallout"
+
 type Params = Promise<{ slug: string }>
 
 type Brand = { id: string | number; name: string; slug: string }
@@ -143,6 +145,12 @@ export default async function UsedBikeDetailPage({ params }: { params: Params })
               )}
             </p>
           )}
+
+          <FinanceCallout
+            bikeName={bike.displayName}
+            price={bike.price}
+            stockNumber={bike.stockNumber}
+          />
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

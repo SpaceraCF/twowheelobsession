@@ -11,6 +11,7 @@ import { migrations } from './migrations/index.ts'
 import { BikeCategories } from './collections/BikeCategories.ts'
 import { Brands } from './collections/Brands.ts'
 import { Enquiries } from './collections/Enquiries.ts'
+import { HeroSlides } from './collections/HeroSlides.ts'
 import { Media } from './collections/Media.ts'
 import { NewBikes } from './collections/NewBikes.ts'
 import { Pages } from './collections/Pages.ts'
@@ -39,6 +40,7 @@ export default buildConfig({
     Enquiries,
     ServiceRequests,
     Pages,
+    HeroSlides,
   ],
   editor: lexicalEditor(),
   // Email: SendGrid via nodemailer SMTP relay if SENDGRID_API_KEY is set,

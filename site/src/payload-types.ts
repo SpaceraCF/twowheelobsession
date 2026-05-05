@@ -76,6 +76,7 @@ export interface Config {
     enquiries: Enquiry;
     'service-requests': ServiceRequest;
     pages: Page;
+    'hero-slides': HeroSlide;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     'service-requests': ServiceRequestsSelect<false> | ServiceRequestsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -524,7 +526,7 @@ export interface UsedBike {
  */
 export interface Enquiry {
   id: number;
-  type: 'new-bike' | 'used-bike' | 'parts' | 'general';
+  type: 'new-bike' | 'used-bike' | 'finance' | 'parts' | 'general';
   name: string;
   email: string;
   phone?: string | null;
@@ -532,6 +534,18 @@ export interface Enquiry {
   message: string;
   newBike?: (number | null) | NewBike;
   usedBike?: (number | null) | UsedBike;
+  /**
+   * Deposit amount available, in AUD. Optional.
+   */
+  financeDeposit?: number | null;
+  /**
+   * Customer-supplied trade-in details, if any.
+   */
+  financeTradeIn?: string | null;
+  /**
+   * Customer's preferred term, if specified.
+   */
+  financeTerm?: ('24' | '36' | '48' | '60' | '72') | null;
   /**
    * URL the form was submitted from.
    */
@@ -609,6 +623,45 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Homepage hero banners. Lower Order numbers appear first. Toggle Active off to hide a slide without deleting it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-slides".
+ */
+export interface HeroSlide {
+  id: number;
+  /**
+   * Internal label only — not shown to customers. e.g. "EOFY 2026 sale".
+   */
+  title: string;
+  /**
+   * Wide hero image, ideally 1920×600 or larger. The Media item's alt text becomes the slide's alt — set it well for accessibility and SEO.
+   */
+  image: number | Media;
+  /**
+   * Where the slide links when clicked. Leave blank to make the slide non-clickable. Internal links: /new-bikes?brand=yamaha. External: full https URL.
+   */
+  linkUrl?: string | null;
+  /**
+   * Lower numbers appear first. Default 100.
+   */
+  order?: number | null;
+  /**
+   * Uncheck to hide without deleting.
+   */
+  active?: boolean | null;
+  /**
+   * Optional. Slide hidden before this date.
+   */
+  startDate?: string | null;
+  /**
+   * Optional. Slide hidden after this date.
+   */
+  endDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -667,6 +720,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'hero-slides';
+        value: number | HeroSlide;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -980,6 +1037,9 @@ export interface EnquiriesSelect<T extends boolean = true> {
   message?: T;
   newBike?: T;
   usedBike?: T;
+  financeDeposit?: T;
+  financeTradeIn?: T;
+  financeTerm?: T;
   pageUrl?: T;
   userAgent?: T;
   status?: T;
@@ -1030,6 +1090,21 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-slides_select".
+ */
+export interface HeroSlidesSelect<T extends boolean = true> {
+  title?: T;
+  image?: T;
+  linkUrl?: T;
+  order?: T;
+  active?: T;
+  startDate?: T;
+  endDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

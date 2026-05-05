@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next"
 import { getPayload } from "payload"
 import config from "@payload-config"
 
+// Sitemap queries Payload (bike collections) at request time. We don't
+// want it bundled into the build (DB may not be ready / dev push-mode
+// triggers an interactive migration prompt at boot).
+export const dynamic = "force-dynamic"
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "")
 
