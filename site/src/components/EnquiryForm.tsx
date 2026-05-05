@@ -23,6 +23,13 @@ const FINANCE_TERMS = [
   { value: "72", label: "72 months" },
 ]
 
+// Single source of truth for form-control styling. `text-zinc-900` keeps
+// VALUES dark; `placeholder:text-zinc-500` keeps placeholders legible
+// without making them indistinguishable from real input. Inheriting the
+// page's text color was rendering both too light on white.
+const FIELD_CLASS =
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+
 export function EnquiryForm() {
   const params = useSearchParams()
   const [type, setType] = useState<string>("general")
@@ -82,7 +89,7 @@ export function EnquiryForm() {
           required
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+          className={FIELD_CLASS}
         >
           {TYPES.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -127,7 +134,7 @@ export function EnquiryForm() {
               id="financeTerm"
               name="financeTerm"
               defaultValue=""
-              className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+              className={FIELD_CLASS}
             >
               {FINANCE_TERMS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -151,7 +158,7 @@ export function EnquiryForm() {
               ? "Tell us anything that helps — preferred lender, employment status, timing, etc. Don't include sensitive financial info here; staff will request the formal application separately."
               : undefined
           }
-          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+          className={FIELD_CLASS}
         />
         {state?.fieldErrors?.message && (
           <p className="mt-1 text-xs text-red-700">{state.fieldErrors.message}</p>
@@ -198,7 +205,7 @@ function Field({
         defaultValue={defaultValue}
         placeholder={placeholder}
         inputMode={inputMode}
-        className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+        className={FIELD_CLASS}
       />
       {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
     </div>
