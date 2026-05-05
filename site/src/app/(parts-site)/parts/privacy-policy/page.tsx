@@ -11,9 +11,9 @@ const LAST_UPDATED = "5 May 2026"
 export default function PrivacyPolicyPage() {
   return (
     <div className="bg-white">
-      <section className="bg-[#0d1f4d] text-white">
+      <section className="bg-black text-white border-t-2 border-red-600">
         <div className="max-w-3xl mx-auto px-6 py-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-red-500">
             Legal
           </p>
           <h1 className="mt-2 text-3xl md:text-4xl font-bold">Privacy Policy</h1>

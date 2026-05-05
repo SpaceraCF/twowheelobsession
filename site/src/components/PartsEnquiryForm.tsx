@@ -13,7 +13,7 @@ import { submitEnquiry, type EnquiryState } from "@/lib/actions/enquiry"
 // distinguishable via the `pageUrl` field.
 
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0d1f4d] focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 export function PartsEnquiryForm() {
   const [pageUrl, setPageUrl] = useState<string>("")
@@ -136,7 +136,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-12 items-center px-6 bg-[#0d1f4d] text-white font-semibold uppercase text-sm tracking-wider hover:bg-[#0a1739] disabled:opacity-50 disabled:cursor-not-allowed self-start"
+      className="inline-flex h-12 items-center px-6 bg-red-600 text-white font-semibold uppercase text-sm tracking-wider hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed self-start"
     >
       {pending ? "Sending…" : "Send parts enquiry"}
     </button>
