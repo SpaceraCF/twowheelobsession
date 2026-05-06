@@ -131,16 +131,6 @@ function FooterMain() {
               yamahapartsaustralia.com.au →
             </a>
           </div>
-          <div>
-            <h4 className="text-zinc-900 font-semibold text-lg">My Account</h4>
-            <ul className="mt-3 text-sm space-y-2 text-zinc-700">
-              <li>
-                <Link href="/admin" className="hover:text-red-600">
-                  Sign in
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </section>

@@ -79,19 +79,9 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Customer-facing icons (search, wishlist, cart) intentionally omitted
-            in v1 — we don't have e-commerce yet and dead icons are worse than
-            no icons. Staff link via the admin button. */}
-        <div className="flex items-center gap-5 text-black ml-auto lg:ml-0">
-          <Link
-            href="/admin"
-            aria-label="Staff admin"
-            title="Staff admin"
-            className="hover:text-[--color-accent]"
-          >
-            <UserIcon />
-          </Link>
-        </div>
+        {/* No customer icons here in v1 — no e-commerce on the main TWO
+            site yet, and the admin is reached by typing /admin directly
+            (kept off the public chrome to reduce attack surface). */}
       </div>
     </header>
   )
@@ -102,14 +92,6 @@ function ClockIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
-    </svg>
-  )
-}
-function UserIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }

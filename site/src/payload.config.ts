@@ -30,6 +30,10 @@ export default buildConfig({
     meta: {
       titleSuffix: '— Two Wheel Obsession Admin',
     },
+    // 'all' lets each user toggle their own preference via their
+    // admin profile page. Payload's `defaultTheme` is 'light', so
+    // first-time visitors land in light mode and can opt into dark.
+    theme: 'all',
   },
   collections: [
     Users,
