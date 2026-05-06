@@ -25,6 +25,7 @@ type OemFinderIframeProps = {
 
 export function OemFinderIframe({ className, bordered = true }: OemFinderIframeProps) {
   const [height, setHeight] = useState<number>(INITIAL_HEIGHT)
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   useEffect(() => {
     function onMessage(ev: MessageEvent) {
@@ -44,8 +45,33 @@ export function OemFinderIframe({ className, bordered = true }: OemFinderIframeP
     return () => window.removeEventListener("message", onMessage)
   }, [])
 
+  // Tell the iframe we're listening — covers the race where the
+  // widget's first height message lands before our `message`
+  // listener attached. The widget script re-emits its current
+  // height on receipt of `ypa:parent:ready`.
+  useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+    function ping() {
+      try {
+        iframe?.contentWindow?.postMessage(
+          { type: "ypa:parent:ready" },
+          window.location.origin,
+        )
+      } catch {
+        /* same-origin only — should not throw */
+      }
+    }
+    iframe.addEventListener("load", ping)
+    // Also try once immediately in case the iframe was already loaded
+    // before this effect ran (browser-cached bfcache, e.g.).
+    ping()
+    return () => iframe.removeEventListener("load", ping)
+  }, [])
+
   return (
     <iframe
+      ref={iframeRef}
       title="Yamaha Genuine Parts Finder"
       src="/oem-widget"
       className={`block w-full bg-white ${bordered ? "border border-zinc-200" : ""} ${className ?? ""}`.trim()}

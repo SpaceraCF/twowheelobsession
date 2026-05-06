@@ -26,9 +26,12 @@ export async function GET() {
     status: 200,
     headers: {
       "content-type": "text/html; charset=utf-8",
-      // Cache for 5 minutes — the access key is good for ~30 min and we don't
-      // want every iframe load to hit our cache helper.
-      "cache-control": "public, max-age=300",
+      // Short cache — the EPC access key is good for ~30 min and we
+      // already cache it server-side, so there's no upstream cost to
+      // re-rendering. Keeping the public cache low (60s) means widget
+      // bug fixes propagate to users within a minute of deploy
+      // instead of being stuck behind a 5-minute browser cache.
+      "cache-control": "public, max-age=60",
     },
   })
 }
@@ -415,6 +418,13 @@ function buildWidgetHtml(accessKey: string) {
     margin: 24px 0 0 0 !important;
     padding: 0 !important;
   }
+  /* The plugin renders model thumbnails into imageWrap once a model
+     is picked. Until then it's empty — hide it so the iframe shrinks
+     down to just the filter panel. */
+  #yamaha-oem-imageWrap:empty {
+    display: none !important;
+    margin: 0 !important;
+  }
   div.modelImageContainer {
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -509,19 +519,24 @@ function buildWidgetHtml(accessKey: string) {
   // iframe; the parent listens for ypa:widget:resize messages.
   (function () {
     var raf = null;
-    var lastReported = 0;
     function report() {
       raf = null;
-      var h = Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight
-      );
-      // Add a few px so the iframe's intrinsic scrollbar never
-      // appears in the parent layout — the body has 48px bottom
-      // padding already so this is just a safety margin.
+      // Only measure body. documentElement.scrollHeight reports a
+      // mysteriously large value in this iframe (the basictable
+      // jQuery plugin builds a hidden mobile-mirror of every table
+      // outside the body normal flow, and Leaflet tile containers
+      // also contribute). Using max(body, docEl) caused a feedback
+      // loop where each resize pushed docEl scrollHeight up.
+      var h = document.body.scrollHeight;
+      // Add a few px so the iframe intrinsic scrollbar never appears
+      // in the parent layout. Body already has 48px bottom padding
+      // so this is just a safety margin.
       h += 4;
-      if (h === lastReported) return;
-      lastReported = h;
+      // Always post — rAF is the throttle, and the parent listener
+      // tolerates duplicates with a 4px diff guard. We previously
+      // skipped duplicates here, which created a race where the
+      // very first message could be missed if it landed before the
+      // parent listener mounted.
       try {
         window.parent && window.parent.postMessage(
           { type: 'ypa:widget:resize', height: h },
@@ -529,6 +544,14 @@ function buildWidgetHtml(accessKey: string) {
         );
       } catch (e) { /* same-origin only */ }
     }
+    // When the parent component mounts it announces itself; on
+    // receipt we re-send the current height so the parent always
+    // gets at least one message even if it missed the initial one
+    // due to lazy-load timing.
+    window.addEventListener('message', function (ev) {
+      if (ev.origin !== window.location.origin) return;
+      if (ev.data && ev.data.type === 'ypa:parent:ready') schedule();
+    });
     function schedule() {
       if (raf) return;
       raf = window.requestAnimationFrame(report);
