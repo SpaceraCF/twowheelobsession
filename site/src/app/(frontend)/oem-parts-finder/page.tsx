@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { OemFinderIframe } from "@/components/OemFinderIframe"
 import { PaymentPromoBanner } from "@/components/SiteFooter"
 
 export const metadata = {
@@ -29,13 +30,7 @@ export default function OemPartsFinderPage() {
             Send parts enquiry
           </Link>
         </div>
-        <iframe
-          title="Yamaha OEM Parts Finder"
-          src="/oem-widget"
-          className="block w-full"
-          style={{ height: "min(90vh, 1400px)", minHeight: 800, border: 0 }}
-          loading="lazy"
-        />
+        <OemFinderIframe bordered={false} />
       </div>
       {/* Parts pay-later messaging belongs here. */}
       <PaymentPromoBanner />

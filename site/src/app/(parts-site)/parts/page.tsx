@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { OemFinderIframe } from "@/components/OemFinderIframe"
 import { PartsEnquiryForm } from "@/components/PartsEnquiryForm"
 
 export const metadata = {
@@ -221,15 +222,7 @@ function FinderSection() {
           </Link>
         </div>
 
-        <div className="bg-white border border-zinc-200 overflow-hidden">
-          <iframe
-            title="Yamaha Genuine Parts Finder"
-            src="/oem-widget"
-            className="block w-full"
-            style={{ height: "min(90vh, 1400px)", minHeight: 800, border: 0 }}
-            loading="lazy"
-          />
-        </div>
+        <OemFinderIframe />
       </div>
     </section>
   )

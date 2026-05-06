@@ -501,6 +501,55 @@ function buildWidgetHtml(accessKey: string) {
 <script src="/oem/js/libs/jquery.cookies.2.2.0.min.js"></script>
 <script src="/oem/js/yamaha-oem-parts-lookup.js"></script>
 <script>
+  // ===== Auto-height reporting =====
+  // The widget sits in an iframe inside the parts site. The parent
+  // gives it a fixed height by default which leaves a big empty
+  // rectangle below the filter panel when nothing's selected. Report
+  // our real content height to the parent so it can shrink-wrap the
+  // iframe; the parent listens for ypa:widget:resize messages.
+  (function () {
+    var raf = null;
+    var lastReported = 0;
+    function report() {
+      raf = null;
+      var h = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      );
+      // Add a few px so the iframe's intrinsic scrollbar never
+      // appears in the parent layout — the body has 48px bottom
+      // padding already so this is just a safety margin.
+      h += 4;
+      if (h === lastReported) return;
+      lastReported = h;
+      try {
+        window.parent && window.parent.postMessage(
+          { type: 'ypa:widget:resize', height: h },
+          window.location.origin
+        );
+      } catch (e) { /* same-origin only */ }
+    }
+    function schedule() {
+      if (raf) return;
+      raf = window.requestAnimationFrame(report);
+    }
+    window.addEventListener('load', schedule);
+    window.addEventListener('resize', schedule);
+    // Watch the body for any DOM/style changes — covers the EPC
+    // plugin populating the parts table, showing/hiding the diagram,
+    // dropdown changes, etc.
+    if (window.ResizeObserver) {
+      new ResizeObserver(schedule).observe(document.body);
+    }
+    if (window.MutationObserver) {
+      new MutationObserver(schedule).observe(document.body, {
+        childList: true, subtree: true, attributes: true,
+      });
+    }
+    // First report ASAP so the parent doesn't show 800px of empty space.
+    schedule();
+  })();
+
   // ===== Cart bridge =====
   // Intercept clicks on the EPC plugin's "Add to Cart" buttons and
   // postMessage the part data to the parent window (the parts site
