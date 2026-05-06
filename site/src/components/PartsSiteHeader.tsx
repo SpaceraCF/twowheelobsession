@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { CartPill } from "./CartPill"
+
 const NAV = [
   { label: "Home", href: "/" },
   { label: "Find Parts", href: "/#finder" },
@@ -57,12 +59,15 @@ export function PartsSiteHeader() {
           ))}
         </nav>
 
-        <a
-          href="tel:+61243319007"
-          className="md:hidden ml-auto text-[13px] font-bold text-red-600"
-        >
-          (02) 4331 9007
-        </a>
+        <div className="ml-auto md:ml-0 flex items-center gap-3">
+          <CartPill />
+          <a
+            href="tel:+61243319007"
+            className="md:hidden text-[13px] font-bold text-red-600"
+          >
+            (02) 4331 9007
+          </a>
+        </div>
       </div>
     </header>
   )

@@ -21,7 +21,10 @@ const PARTS_HOSTS = new Set([
 
 // Routes that serve identical content on both domains (no rewrite). The
 // EPC widget is iframed by both sites — same dealer key, same upstream.
-const SHARED_PREFIXES = ['/oem-widget']
+// Checkout API endpoints are shared so the parts site can POST to them
+// (the parts host's relative `/api/checkout/...` calls would otherwise
+// be rewritten to `/parts/api/checkout/...` which doesn't exist).
+const SHARED_PREFIXES = ['/oem-widget', '/api/checkout']
 
 export function proxy(request: NextRequest) {
   const host = (request.headers.get('host') ?? '').toLowerCase()

@@ -1,9 +1,11 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
+import { CartDrawer } from "@/components/CartDrawer"
 import { JsonLd } from "@/components/JsonLd"
 import { PartsSiteFooter } from "@/components/PartsSiteFooter"
 import { PartsSiteHeader } from "@/components/PartsSiteHeader"
+import { CartProvider } from "@/lib/cart/CartContext"
 import { partsStoreJsonLd, websiteJsonLd } from "@/lib/seo/jsonld"
 
 import "../(frontend)/globals.css"
@@ -69,9 +71,12 @@ export default function PartsSiteLayout({
             name: "Yamaha Parts Australia",
           })}
         />
-        <PartsSiteHeader />
-        <main className="flex-1">{children}</main>
-        <PartsSiteFooter />
+        <CartProvider>
+          <PartsSiteHeader />
+          <main className="flex-1">{children}</main>
+          <PartsSiteFooter />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   )

@@ -82,6 +82,22 @@ services:
         value: Two Wheel Obsession
       - key: ENQUIRY_NOTIFY_EMAIL
         value: enquiries@twowheelobsession.com.au
+      # Yamaha Parts Australia parts orders go here for manual fulfilment.
+      - key: PARTS_ORDER_NOTIFY_EMAIL
+        value: info@twowheelobsession.com.au
+      # PayPal checkout — `sandbox` while developing, swap to `live` for
+      # production cutover. Client ID + secret are sync:false so they
+      # must be set explicitly in the Render dashboard, never committed.
+      - key: PAYPAL_ENV
+        value: sandbox
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      # Same value as PAYPAL_CLIENT_ID — Next.js requires the
+      # NEXT_PUBLIC_ prefix for any var referenced in client bundles.
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+        sync: false
 
   - type: cron
     name: twowo-yamaha-sync

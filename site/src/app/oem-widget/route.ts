@@ -500,6 +500,115 @@ function buildWidgetHtml(accessKey: string) {
 <script src="/oem/js/libs/imgViewer2.min.js"></script>
 <script src="/oem/js/libs/jquery.cookies.2.2.0.min.js"></script>
 <script src="/oem/js/yamaha-oem-parts-lookup.js"></script>
+<script>
+  // ===== Cart bridge =====
+  // Intercept clicks on the EPC plugin's "Add to Cart" buttons and
+  // postMessage the part data to the parent window (the parts site
+  // shell). Capture phase + stopImmediatePropagation runs BEFORE the
+  // plugin's own jQuery handler, so the plugin's WooCommerce-targeted
+  // logic (which would 404 here) never fires.
+  //
+  // Row anatomy (from yamaha-oem-parts-lookup.js, line 786/803):
+  //   td.refCol           — RefNo
+  //   td.text.descCol     — description (display name)
+  //   td                  — part number (the SKU)
+  //   td.numberCol        — qty per assembly (NOT customer qty)
+  //   td > input.qtyTextbox#qty_<PartID> — customer qty input
+  //   td > span           — price, GST-inclusive ("$X.XX")
+  //   td.addToCart > input.btnAddToCart[data-partid][data-partno]
+  (function () {
+    function onClick(ev) {
+      var btn = ev.target;
+      if (!btn || !btn.classList || !btn.classList.contains('btnAddToCart')) return;
+
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+
+      // Walk up to the row.
+      var row = btn.closest ? btn.closest('tr') : null;
+      if (!row) return;
+
+      var partNo = btn.getAttribute('data-partno') || btn.getAttribute('data-partid') || '';
+      var partId = btn.getAttribute('data-partid') || '';
+
+      // Description is in the descCol td.
+      var descCell = row.querySelector('td.descCol');
+      var name = descCell ? descCell.textContent.trim() : partNo;
+
+      // Customer qty input.
+      var qtyInput = row.querySelector('input.qtyTextbox');
+      var qty = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+      if (!qty || qty < 1) qty = 1;
+
+      // Price cell — last <td> typically; pull the first $-prefixed number.
+      var priceText = '';
+      var cells = row.querySelectorAll('td');
+      for (var i = cells.length - 1; i >= 0; i--) {
+        var t = cells[i].textContent || '';
+        var m = t.match(/\\$\\s*([0-9,]+(?:\\.[0-9]+)?)/);
+        if (m) { priceText = m[1].replace(/,/g, ''); break; }
+      }
+      var unitPrice = priceText ? parseFloat(priceText) : NaN;
+      if (!isFinite(unitPrice) || unitPrice <= 0) {
+        // Plugin couldn't determine a price — bail out and let the user know.
+        // (Some EPC parts are flagged "not for sale" — we should respect that.)
+        showInlineMessage(btn, 'Price unavailable — call us', '#b91c1c');
+        return;
+      }
+
+      // Pull the bike context from the filter dropdowns so staff can verify fitment.
+      function selText(id) {
+        var s = document.getElementById(id);
+        if (!s || s.selectedIndex < 0) return '';
+        var t = s.options[s.selectedIndex] && s.options[s.selectedIndex].text;
+        return (t || '').trim();
+      }
+      var ctx = [selText('YearSelect'), selText('ModelSelect')]
+        .filter(function (x) { return x && x.toLowerCase() !== 'select year' && x.toLowerCase() !== 'select model'; })
+        .join(' ');
+
+      var payload = {
+        sku: String(partNo).toUpperCase(),
+        name: name,
+        unitPrice: unitPrice,
+        qty: qty,
+        bikeContext: ctx || undefined,
+      };
+
+      try {
+        window.parent && window.parent.postMessage(
+          { type: 'ypa:cart:add', payload: payload },
+          window.location.origin
+        );
+      } catch (e) { /* same-origin only — should not fail */ }
+
+      showInlineMessage(btn, 'Added to cart ✓', '#15803d');
+    }
+
+    function showInlineMessage(btn, text, color) {
+      // Re-use the existing successAdd_<PartID> span if the plugin
+      // generated one; otherwise inject a small floater next to the
+      // button for two seconds.
+      var partId = btn.getAttribute('data-partid');
+      var existing = partId ? document.getElementById('successAdd_' + partId) : null;
+      if (existing) {
+        existing.textContent = text;
+        existing.style.color = color;
+        existing.style.display = 'inline';
+        setTimeout(function () { existing.style.display = 'none'; }, 2000);
+        return;
+      }
+      var span = document.createElement('span');
+      span.textContent = ' ' + text;
+      span.style.cssText = 'margin-left:8px;font-weight:600;font-size:13px;color:' + color;
+      btn.parentNode && btn.parentNode.insertBefore(span, btn.nextSibling);
+      setTimeout(function () { if (span.parentNode) span.parentNode.removeChild(span); }, 2000);
+    }
+
+    // Capture-phase listener so we run BEFORE jQuery's bubble-phase handler.
+    document.addEventListener('click', onClick, true);
+  })();
+</script>
 </body>
 </html>`
 }

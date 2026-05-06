@@ -14,6 +14,7 @@ import { Enquiries } from './collections/Enquiries.ts'
 import { HeroSlides } from './collections/HeroSlides.ts'
 import { Media } from './collections/Media.ts'
 import { NewBikes } from './collections/NewBikes.ts'
+import { Orders } from './collections/Orders.ts'
 import { Pages } from './collections/Pages.ts'
 import { ServiceRequests } from './collections/ServiceRequests.ts'
 import { UsedBikes } from './collections/UsedBikes.ts'
@@ -39,6 +40,7 @@ export default buildConfig({
     UsedBikes,
     Enquiries,
     ServiceRequests,
+    Orders,
     Pages,
     HeroSlides,
   ],

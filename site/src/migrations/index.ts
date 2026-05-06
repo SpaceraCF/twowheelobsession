@@ -6,6 +6,7 @@ import * as migration_20260429_045222_initial from './20260429_045222_initial.ts
 import * as migration_20260429_053253_add_color_image_url from './20260429_053253_add_color_image_url.ts'
 import * as migration_20260429_063949_extend_specs_and_description from './20260429_063949_extend_specs_and_description.ts'
 import * as migration_20260505_060257_hero_slides_and_finance from './20260505_060257_hero_slides_and_finance.ts'
+import * as migration_20260506_031225_add_orders from './20260506_031225_add_orders.ts'
 
 export const migrations = [
   {
@@ -27,5 +28,10 @@ export const migrations = [
     up: migration_20260505_060257_hero_slides_and_finance.up,
     down: migration_20260505_060257_hero_slides_and_finance.down,
     name: '20260505_060257_hero_slides_and_finance',
+  },
+  {
+    up: migration_20260506_031225_add_orders.up,
+    down: migration_20260506_031225_add_orders.down,
+    name: '20260506_031225_add_orders',
   },
 ]

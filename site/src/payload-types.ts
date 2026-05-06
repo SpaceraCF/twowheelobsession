@@ -75,6 +75,7 @@ export interface Config {
     'used-bikes': UsedBike;
     enquiries: Enquiry;
     'service-requests': ServiceRequest;
+    orders: Order;
     pages: Page;
     'hero-slides': HeroSlide;
     'payload-kv': PayloadKv;
@@ -92,6 +93,7 @@ export interface Config {
     'used-bikes': UsedBikesSelect<false> | UsedBikesSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     'service-requests': ServiceRequestsSelect<false> | ServiceRequestsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -596,6 +598,69 @@ export interface ServiceRequest {
   createdAt: string;
 }
 /**
+ * Parts orders from yamahapartsaustralia.com.au. Customers paid via PayPal — fulfil via Evopos and update status as you go.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  /**
+   * Generated server-side at checkout (e.g. YPA-12345).
+   */
+  orderNumber: string;
+  status?: ('paid' | 'processing' | 'shipped' | 'picked-up' | 'completed' | 'cancelled' | 'refunded') | null;
+  shippingMethod: 'au-flat' | 'pickup';
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  suburb?: string | null;
+  state?: ('NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT') | null;
+  postcode?: string | null;
+  lineItems: {
+    /**
+     * EPC part number / Yamaha SKU.
+     */
+    sku: string;
+    name: string;
+    qty: number;
+    /**
+     * AUD, GST-inclusive (Yamaha RRP from EPC).
+     */
+    unitPrice: number;
+    lineTotal: number;
+    id?: string | null;
+  }[];
+  /**
+   * AUD
+   */
+  subtotal: number;
+  /**
+   * AUD
+   */
+  shipping: number;
+  /**
+   * AUD
+   */
+  total: number;
+  /**
+   * sandbox or live at time of order.
+   */
+  paypalEnv?: string | null;
+  paypalOrderId?: string | null;
+  paypalCaptureId?: string | null;
+  paypalCaptureStatus?: string | null;
+  paypalPayerEmail?: string | null;
+  /**
+   * Internal — never shown to the customer. Tracking, packed-by, etc.
+   */
+  fulfilmentNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -716,6 +781,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'service-requests';
         value: number | ServiceRequest;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
       } | null)
     | ({
         relationTo: 'pages';
@@ -1076,6 +1145,44 @@ export interface ServiceRequestsSelect<T extends boolean = true> {
   actualCost?: T;
   workshopNotes?: T;
   displayTitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  status?: T;
+  shippingMethod?: T;
+  customerName?: T;
+  customerEmail?: T;
+  customerPhone?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  suburb?: T;
+  state?: T;
+  postcode?: T;
+  lineItems?:
+    | T
+    | {
+        sku?: T;
+        name?: T;
+        qty?: T;
+        unitPrice?: T;
+        lineTotal?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  shipping?: T;
+  total?: T;
+  paypalEnv?: T;
+  paypalOrderId?: T;
+  paypalCaptureId?: T;
+  paypalCaptureStatus?: T;
+  paypalPayerEmail?: T;
+  fulfilmentNotes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
