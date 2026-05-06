@@ -4,11 +4,22 @@ export const UsedBikes: CollectionConfig = {
   slug: 'used-bikes',
   admin: {
     useAsTitle: 'displayName',
-    defaultColumns: ['stockNumber', 'displayName', 'year', 'kms', 'price', 'listingStatus', 'updatedAt'],
+    defaultColumns: ['thumb', 'stockNumber', 'displayName', 'year', 'kms', 'price', 'listingStatus', 'updatedAt'],
     group: 'Bikes',
   },
   versions: { drafts: { autosave: { interval: 800 } } },
   fields: [
+    {
+      // UI-only — renders the cover photo (first item in `photos`)
+      // for the admin list view. Empty placeholder when none.
+      name: 'thumb',
+      type: 'ui',
+      admin: {
+        components: {
+          Cell: '/admin/cells/UsedBikeThumbCell.tsx#default',
+        },
+      },
+    },
     {
       type: 'tabs',
       tabs: [

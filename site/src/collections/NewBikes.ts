@@ -4,10 +4,22 @@ export const NewBikes: CollectionConfig = {
   slug: 'new-bikes',
   admin: {
     useAsTitle: 'displayName',
-    defaultColumns: ['displayName', 'brand', 'category', 'year', 'price', 'status', 'source'],
+    defaultColumns: ['thumb', 'displayName', 'brand', 'category', 'year', 'price', 'status', 'source'],
     group: 'Bikes',
   },
   fields: [
+    {
+      // UI-only — no DB column. The custom Cell renders the bike's
+      // image, falling back to externalImageUrl when no Media has
+      // been uploaded yet (Yamaha sync stores URLs, not Media).
+      name: 'thumb',
+      type: 'ui',
+      admin: {
+        components: {
+          Cell: '/admin/cells/NewBikeThumbCell.tsx#default',
+        },
+      },
+    },
     {
       type: 'tabs',
       tabs: [
