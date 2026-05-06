@@ -6,6 +6,20 @@ export const Media: CollectionConfig = {
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'alt', 'mimeType', 'filesize', 'updatedAt'],
   },
+  // Public read so hero images, brand logos, and used-bike photos
+  // load on the customer-facing site. Server-side Payload calls
+  // (e.g. getPayload(...).find from a server component) bypass
+  // access checks anyway; this rule applies to the
+  // /api/media/file/* endpoint that the BROWSER hits when
+  // <Image> resolves a Media URL. Without it, Payload returns
+  // 401 "You are not allowed to perform this action" and every
+  // hero / logo / photo renders as a broken image.
+  //
+  // Create / update / delete remain default (logged-in user) so
+  // the public can't upload via the REST API.
+  access: {
+    read: () => true,
+  },
   upload: {
     // In production on Render this is /var/data/media (a persistent disk).
     // Locally it's just ./media in the project, gitignored.
