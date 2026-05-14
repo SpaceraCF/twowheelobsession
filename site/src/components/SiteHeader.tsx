@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { CartPill } from "./CartPill"
+
 const NAV = [
   { label: "Home", href: "/" },
   { label: "Shop Motorcycles", href: "/new-bikes" },
@@ -79,9 +81,13 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* No customer icons here in v1 — no e-commerce on the main TWO
-            site yet, and the admin is reached by typing /admin directly
-            (kept off the public chrome to reduce attack surface). */}
+        {/* Cart pill is hidden when the cart's empty (this is the main
+            TWO site — most visitors are here for bikes/service and
+            shouldn't see e-commerce chrome). The moment someone adds a
+            part from the OEM finder iframe, the pill appears and the
+            drawer opens automatically. Admin entry is still by typing
+            /admin directly — kept off the chrome to reduce surface. */}
+        <CartPill hideWhenEmpty />
       </div>
     </header>
   )

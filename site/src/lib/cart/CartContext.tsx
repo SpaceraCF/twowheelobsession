@@ -147,6 +147,18 @@ export function useCart() {
   return ctx
 }
 
+/**
+ * Like `useCart` but returns `null` if there's no provider in the
+ * tree instead of throwing. Used by components (e.g. CartPill in
+ * SiteHeader) that render in places that may or may not have a
+ * CartProvider — the 404 / global-not-found pages render
+ * SiteHeader standalone outside the route-group layout that provides
+ * the cart context.
+ */
+export function useCartOptional() {
+  return useContext(CartContext)
+}
+
 // Used by the success page after PayPal capture — clear the cart on
 // the client without needing a full <CartProvider> remount.
 export function clearCartStorage() {

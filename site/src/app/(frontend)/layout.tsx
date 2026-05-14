@@ -1,9 +1,11 @@
 import type { Metadata } from "next"
 import { Inter, Bebas_Neue } from "next/font/google"
 
+import { CartDrawer } from "@/components/CartDrawer"
 import { JsonLd } from "@/components/JsonLd"
 import { SiteHeader } from "@/components/SiteHeader"
 import { SiteFooter } from "@/components/SiteFooter"
+import { CartProvider } from "@/lib/cart/CartContext"
 import { mainDealerJsonLd, websiteJsonLd } from "@/lib/seo/jsonld"
 
 import "./globals.css"
@@ -67,9 +69,16 @@ export default function RootLayout({
             name: "Two Wheel Obsession",
           })}
         />
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        {/* CartProvider wraps the whole tree so the EPC widget's
+            postMessage on /oem-parts-finder lands in a real cart.
+            Pill in SiteHeader stays hidden until items > 0; checkout
+            link goes to /checkout which redirects to /parts/checkout. */}
+        <CartProvider>
+          <SiteHeader />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   )

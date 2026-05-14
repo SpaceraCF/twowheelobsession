@@ -1,9 +1,29 @@
 "use client"
 
-import { useCart } from "@/lib/cart/CartContext"
+import { useCartOptional } from "@/lib/cart/CartContext"
 
-export function CartPill() {
-  const { itemCount, open, isHydrated } = useCart()
+type CartPillProps = {
+  /**
+   * If true, render nothing when the cart is empty. Use on the main
+   * TWO site so bike pages don't show a useless empty cart icon —
+   * the pill appears the moment a customer adds a part from the
+   * OEM finder iframe. On the parts site, leave default (always
+   * visible) since that whole site is e-commerce.
+   */
+  hideWhenEmpty?: boolean
+}
+
+export function CartPill({ hideWhenEmpty = false }: CartPillProps) {
+  const cart = useCartOptional()
+  // SiteHeader renders on /_not-found and global-not-found.tsx —
+  // those don't include the CartProvider. Render nothing rather than
+  // crash the server render.
+  if (!cart) return null
+  const { itemCount, open, isHydrated } = cart
+
+  // Pre-hydration: never render when hideWhenEmpty, to avoid a flash
+  // of the pill appearing then disappearing once localStorage settles.
+  if (hideWhenEmpty && (!isHydrated || itemCount === 0)) return null
 
   return (
     <button
