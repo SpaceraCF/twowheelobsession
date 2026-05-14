@@ -5,6 +5,7 @@ import { CartDrawer } from "@/components/CartDrawer"
 import { JsonLd } from "@/components/JsonLd"
 import { SiteHeader } from "@/components/SiteHeader"
 import { SiteFooter } from "@/components/SiteFooter"
+import { TawkChat } from "@/components/TawkChat"
 import { CartProvider } from "@/lib/cart/CartContext"
 import { mainDealerJsonLd, websiteJsonLd } from "@/lib/seo/jsonld"
 
@@ -79,6 +80,7 @@ export default function RootLayout({
           <SiteFooter />
           <CartDrawer />
         </CartProvider>
+        <TawkChat />
       </body>
     </html>
   )

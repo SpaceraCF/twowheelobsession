@@ -98,6 +98,12 @@ services:
       # NEXT_PUBLIC_ prefix for any var referenced in client bundles.
       - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
         sync: false
+      # tawk.to live chat — free, no monthly fee. Both IDs come from
+      # the tawk.to dashboard. Leave unset to disable the chat widget.
+      - key: NEXT_PUBLIC_TAWK_PROPERTY_ID
+        sync: false
+      - key: NEXT_PUBLIC_TAWK_WIDGET_ID
+        sync: false
 
   - type: cron
     name: twowo-yamaha-sync
