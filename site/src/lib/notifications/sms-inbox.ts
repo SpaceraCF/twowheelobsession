@@ -1,30 +1,43 @@
-// Email bridge used until Web Push lands (checkpoint 2). When a new
-// inbound SMS arrives, fire an email to all staff with role=staff or
-// role=admin. The email body has the customer's phone number and
-// message preview + a link straight into the conversation thread in
-// the admin so they can tap-and-reply on mobile.
+// Fan-out helpers for the SMS inbox. Called from the Twilio inbound
+// webhook. Three notification channels:
+//   1. Web Push to subscribed staff PWAs (primary)
+//   2. Email to all staff (always-on fallback so we never lose a message)
+//   3. SMS to each staff member who opted in (belt + braces — optional)
 
-import { getPayload } from 'payload'
 import type { Payload } from 'payload'
+
+import { sendPush, type PushSubscriptionRecord } from '@/lib/push/server'
+import { sendSms } from '@/lib/twilio/client'
 
 const ADMIN_BASE = (process.env.SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
 
-type NotifyArgs = {
+type FanOutArgs = {
   payload: Payload
   conversationId: string | number
   phoneNumber: string
   body: string
 }
 
-export async function notifyStaffOfInboundSms({
+type StaffRow = {
+  id: string | number
+  email?: string
+  personalMobile?: string
+  smsFanOutEnabled?: boolean
+  pushSubscriptions?: PushSubscriptionRecord[]
+}
+
+/**
+ * Loads every admin/staff user once and runs three notification
+ * channels in parallel. Errors are logged but never thrown — losing
+ * an email doesn't block the push, etc.
+ */
+export async function fanOutInboundSms({
   payload,
   conversationId,
   phoneNumber,
   body,
-}: NotifyArgs): Promise<void> {
-  if (!payload.email) return
-
-  let staffEmails: string[] = []
+}: FanOutArgs): Promise<void> {
+  let staff: StaffRow[] = []
   try {
     const result = await payload.find({
       collection: 'users',
@@ -32,48 +45,135 @@ export async function notifyStaffOfInboundSms({
       limit: 100,
       depth: 0,
     })
-    staffEmails = result.docs
-      .map((u) => (u as { email?: string }).email)
-      .filter((e): e is string => typeof e === 'string' && e.includes('@'))
+    staff = result.docs as unknown as StaffRow[]
   } catch (err) {
-    payload.logger.error({ err }, '[SMS inbox] could not load staff users for notification')
+    payload.logger.error({ err }, '[sms-inbox] could not load staff users')
     return
   }
 
-  if (staffEmails.length === 0) return
+  if (staff.length === 0) return
 
-  const subject = `[SMS Inbox] ${phoneNumber}: ${body.slice(0, 60)}`
   const preview = body.replace(/\s+/g, ' ').slice(0, 300)
-  const link = `${ADMIN_BASE}/admin/collections/conversations/${conversationId}`
+  const conversationLink = `${ADMIN_BASE}/admin/collections/conversations/${conversationId}`
 
+  await Promise.allSettled([
+    pushFanOut({ payload, staff, phoneNumber, preview, conversationId }),
+    emailFanOut({ payload, staff, phoneNumber, preview, conversationLink }),
+    smsFanOut({ payload, staff, phoneNumber, preview }),
+  ])
+}
+
+async function pushFanOut(args: {
+  payload: Payload
+  staff: StaffRow[]
+  phoneNumber: string
+  preview: string
+  conversationId: string | number
+}) {
+  const url = `/admin/collections/conversations/${args.conversationId}`
+  const payload: import('@/lib/push/server').PushPayload = {
+    title: `SMS from ${args.phoneNumber}`,
+    body: args.preview,
+    url,
+    tag: `convo-${args.conversationId}`,
+  }
+
+  for (const user of args.staff) {
+    const subs = Array.isArray(user.pushSubscriptions) ? user.pushSubscriptions : []
+    if (subs.length === 0) continue
+
+    // Track gone subscriptions so we can prune them from the user
+    // after the loop.
+    const goneEndpoints: string[] = []
+    await Promise.all(
+      subs.map(async (sub) => {
+        const status = await sendPush(sub, payload)
+        if (status === 'gone' && sub.endpoint) goneEndpoints.push(sub.endpoint)
+      }),
+    )
+
+    if (goneEndpoints.length > 0) {
+      const remaining = subs.filter((s) => !goneEndpoints.includes(s.endpoint))
+      try {
+        await args.payload.update({
+          collection: 'users',
+          id: user.id,
+          data: { pushSubscriptions: remaining } as never,
+        })
+      } catch (err) {
+        args.payload.logger.error({ err }, '[sms-inbox] failed to prune dead push subscriptions')
+      }
+    }
+  }
+}
+
+async function emailFanOut(args: {
+  payload: Payload
+  staff: StaffRow[]
+  phoneNumber: string
+  preview: string
+  conversationLink: string
+}) {
+  if (!args.payload.email) return
+  const emails = args.staff
+    .map((u) => u.email)
+    .filter((e): e is string => typeof e === 'string' && e.includes('@'))
+  if (emails.length === 0) return
+
+  const subject = `[SMS Inbox] ${args.phoneNumber}: ${args.preview.slice(0, 60)}`
   const text = [
-    `New SMS to the TWO inbox.`,
+    'New SMS to the TWO inbox.',
     '',
-    `From: ${phoneNumber}`,
+    `From: ${args.phoneNumber}`,
     '',
     'Message:',
-    preview,
+    args.preview,
     '',
-    `Open and reply: ${link}`,
-    '',
-    "(Email is a temporary bridge — push notifications land in the next deploy.)",
+    `Open and reply: ${args.conversationLink}`,
   ].join('\n')
 
-  // Send to every staff member in parallel. Don't block on individual
-  // failures — one bad address shouldn't stop the others.
   await Promise.all(
-    staffEmails.map(async (to) => {
+    emails.map(async (to) => {
       try {
-        await payload.sendEmail({ to, subject, text })
+        await args.payload.sendEmail({ to, subject, text })
       } catch (err) {
-        payload.logger.error(
+        args.payload.logger.error(
           { err, to },
-          '[SMS inbox] failed to send inbound notification email',
+          '[sms-inbox] notification email failed',
         )
       }
     }),
   )
 }
 
-// Convenience for endpoints that already have a Payload instance handy.
-export { getPayload }
+async function smsFanOut(args: {
+  payload: Payload
+  staff: StaffRow[]
+  phoneNumber: string
+  preview: string
+}) {
+  const recipients = args.staff.filter(
+    (u) =>
+      u.smsFanOutEnabled &&
+      typeof u.personalMobile === 'string' &&
+      /^\+\d{8,15}$/.test(u.personalMobile),
+  )
+  if (recipients.length === 0) return
+
+  // Keep the SMS short to stay in one segment (160 chars). Twilio
+  // charges per segment so a one-segment notification is the
+  // cheapest fan-out.
+  const body = `TWO inbox: ${args.phoneNumber} — ${args.preview.slice(0, 100)}`
+
+  await Promise.all(
+    recipients.map(async (user) => {
+      const result = await sendSms({ to: user.personalMobile as string, body })
+      if (!result.ok) {
+        args.payload.logger.error(
+          { reason: result.reason, message: result.message, to: user.personalMobile },
+          '[sms-inbox] SMS fan-out failed',
+        )
+      }
+    }),
+  )
+}

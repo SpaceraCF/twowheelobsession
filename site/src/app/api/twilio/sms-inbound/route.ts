@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-import { notifyStaffOfInboundSms } from '@/lib/notifications/sms-inbox'
+import { fanOutInboundSms } from '@/lib/notifications/sms-inbox'
 import { validateTwilioSignature } from '@/lib/twilio/client'
 
 // Twilio inbound SMS webhook. Twilio POSTs every incoming SMS to this
@@ -124,14 +124,15 @@ export async function POST(req: Request) {
     // investigate than reprocess.
   }
 
-  // Fire staff email notification (best effort).
-  notifyStaffOfInboundSms({
+  // Fan out: Web Push to subscribed PWAs + email to all staff +
+  // optional SMS to staff who opted in. All best-effort.
+  fanOutInboundSms({
     payload,
     conversationId,
     phoneNumber: from,
     body,
   }).catch((err) => {
-    payload.logger.error({ err }, '[twilio inbound] notification email errored')
+    payload.logger.error({ err }, '[twilio inbound] fan-out errored')
   })
 
   // Empty TwiML response — tells Twilio "we got it, don't auto-reply".

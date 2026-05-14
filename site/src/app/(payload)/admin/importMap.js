@@ -26,6 +26,7 @@ import { default as default_ae2aee17467bb69ed280221d509fb719 } from '../../../ad
 import { default as default_cf724b1e88c35c4fe94c8eaa499690e3 } from '../../../admin/components/ConversationThread.tsx'
 import { default as default_65ed0945efe3aad60a7bc8592e85b6bb } from '../../../admin/graphics/Icon.tsx'
 import { default as default_a6801f351999135bbacec7ae94b55ad0 } from '../../../admin/graphics/Logo.tsx'
+import { default as default_a42a9cf3ec1aca41e7925b1890c02d6a } from '../../../admin/components/PushSetup.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -58,5 +59,6 @@ export const importMap = {
   "/admin/components/ConversationThread.tsx#default": default_cf724b1e88c35c4fe94c8eaa499690e3,
   "/admin/graphics/Icon.tsx#default": default_65ed0945efe3aad60a7bc8592e85b6bb,
   "/admin/graphics/Logo.tsx#default": default_a6801f351999135bbacec7ae94b55ad0,
+  "/admin/components/PushSetup.tsx#default": default_a42a9cf3ec1aca41e7925b1890c02d6a,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

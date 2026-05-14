@@ -149,6 +149,27 @@ export interface User {
   id: number;
   name?: string | null;
   role: 'admin' | 'staff';
+  /**
+   * E.164 format, e.g. +61400000000. Only used if SMS fan-out is enabled.
+   */
+  personalMobile?: string | null;
+  /**
+   * When on, every inbound customer SMS triggers an extra notification SMS to the number above. Costs ~A$0.07 per fan-out — toggle on for staff on-call, off for everyone else.
+   */
+  smsFanOutEnabled?: boolean | null;
+  /**
+   * Web Push subscriptions for this user (managed by the PWA — do not edit).
+   */
+  pushSubscriptions?:
+    | {
+        endpoint: string;
+        p256dh: string;
+        auth: string;
+        userAgent?: string | null;
+        createdAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -933,6 +954,18 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  personalMobile?: T;
+  smsFanOutEnabled?: T;
+  pushSubscriptions?:
+    | T
+    | {
+        endpoint?: T;
+        p256dh?: T;
+        auth?: T;
+        userAgent?: T;
+        createdAt?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;

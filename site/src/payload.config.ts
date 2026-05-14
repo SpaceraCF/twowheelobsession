@@ -45,6 +45,11 @@ export default buildConfig({
         Logo: '/admin/graphics/Logo.tsx#default',
         Icon: '/admin/graphics/Icon.tsx#default',
       },
+      // Mounted globally inside the admin React tree — registers the
+      // Service Worker, prompts for push permission, and shows the
+      // iOS "Add to Home Screen" install banner. Renders nothing
+      // once subscribed.
+      providers: ['/admin/components/PushSetup.tsx#default'],
     },
   },
   collections: [

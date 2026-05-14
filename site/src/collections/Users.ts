@@ -55,5 +55,57 @@ export const Users: CollectionConfig = {
         update: isAdminField,
       },
     },
+    {
+      type: 'collapsible',
+      label: 'SMS inbox notifications',
+      admin: {
+        initCollapsed: false,
+        description:
+          'Optional belt-and-braces SMS fallback for the SMS inbox. ' +
+          'Web Push is the primary channel — the in-admin PWA setup ' +
+          "handles browser subscriptions automatically. This sends ALSO a copy " +
+          "to your personal mobile when a customer SMS lands, so you can't miss one.",
+      },
+      fields: [
+        {
+          name: 'personalMobile',
+          type: 'text',
+          admin: {
+            description:
+              'E.164 format, e.g. +61400000000. Only used if SMS fan-out is enabled.',
+          },
+        },
+        {
+          name: 'smsFanOutEnabled',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: {
+            description:
+              "When on, every inbound customer SMS triggers an extra notification SMS " +
+              'to the number above. Costs ~A$0.07 per fan-out — toggle on for staff on-call, ' +
+              'off for everyone else.',
+          },
+        },
+      ],
+    },
+    {
+      // Browser push subscriptions. Populated by /api/push/subscribe
+      // when staff installs the admin PWA and grants notification
+      // permission. Hidden from the admin UI — managed automatically.
+      name: 'pushSubscriptions',
+      type: 'array',
+      admin: {
+        readOnly: true,
+        description:
+          'Web Push subscriptions for this user (managed by the PWA — do not edit).',
+      },
+      fields: [
+        { name: 'endpoint', type: 'text', required: true },
+        { name: 'p256dh', type: 'text', required: true },
+        { name: 'auth', type: 'text', required: true },
+        { name: 'userAgent', type: 'text' },
+        { name: 'createdAt', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' } } },
+      ],
+    },
   ],
 }
