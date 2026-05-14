@@ -64,10 +64,12 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    customers: CustomerAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
+    customers: Customer;
     media: Media;
     brands: Brand;
     'bike-categories': BikeCategory;
@@ -88,6 +90,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     brands: BrandsSelect<false> | BrandsSelect<true>;
     'bike-categories': BikeCategoriesSelect<false> | BikeCategoriesSelect<true>;
@@ -115,13 +118,31 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | Customer;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface CustomerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -188,6 +209,72 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Self-registered customer accounts. Used for order history, saved addresses, and (Phase 2) service bookings. Separate from staff Users.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * For order follow-up.
+   */
+  phone?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  suburb?: string | null;
+  state?: ('NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT') | null;
+  postcode?: string | null;
+  /**
+   * Bikes the customer owns. Pre-fills the Phase 2 service-booking flow.
+   */
+  bikes?:
+    | {
+        make: string;
+        model: string;
+        year?: number | null;
+        /**
+         * 17-char VIN, optional but helps with parts fitment.
+         */
+        vin?: string | null;
+        registration?: string | null;
+        registrationState?: ('NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT') | null;
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Customer agreed to receive promotional emails.
+   */
+  marketingConsent?: boolean | null;
+  /**
+   * Customer agreed to receive SMS reminders (service due, parts ready, etc.).
+   */
+  smsConsent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'customers';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -858,6 +945,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -906,10 +997,15 @@ export interface PayloadLockedDocument {
         value: number | HeroSlide;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -919,10 +1015,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   key?: string | null;
   value?:
     | {
@@ -973,6 +1074,52 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  phone?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  suburb?: T;
+  state?: T;
+  postcode?: T;
+  bikes?:
+    | T
+    | {
+        make?: T;
+        model?: T;
+        year?: T;
+        vin?: T;
+        registration?: T;
+        registrationState?: T;
+        notes?: T;
+        id?: T;
+      };
+  marketingConsent?: T;
+  smsConsent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { HeaderAccountMenu } from "./account/HeaderAccountMenu"
+
 import { CartPill } from "./CartPill"
 
 const NAV = [
@@ -87,7 +89,10 @@ export function SiteHeader() {
             part from the OEM finder iframe, the pill appears and the
             drawer opens automatically. Admin entry is still by typing
             /admin directly — kept off the chrome to reduce surface. */}
-        <CartPill hideWhenEmpty />
+        <div className="flex items-center gap-5">
+          <HeaderAccountMenu />
+          <CartPill hideWhenEmpty />
+        </div>
       </div>
     </header>
   )

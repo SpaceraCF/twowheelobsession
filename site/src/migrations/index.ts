@@ -9,6 +9,7 @@ import * as migration_20260505_060257_hero_slides_and_finance from './20260505_0
 import * as migration_20260506_031225_add_orders from './20260506_031225_add_orders.ts'
 import * as migration_20260514_014232_add_sms_inbox from './20260514_014232_add_sms_inbox.ts'
 import * as migration_20260514_015237_add_user_push_sms from './20260514_015237_add_user_push_sms.ts'
+import * as migration_20260514_021600_add_customers from './20260514_021600_add_customers.ts'
 
 export const migrations = [
   {
@@ -45,5 +46,10 @@ export const migrations = [
     up: migration_20260514_015237_add_user_push_sms.up,
     down: migration_20260514_015237_add_user_push_sms.down,
     name: '20260514_015237_add_user_push_sms',
+  },
+  {
+    up: migration_20260514_021600_add_customers.up,
+    down: migration_20260514_021600_add_customers.down,
+    name: '20260514_021600_add_customers',
   },
 ]

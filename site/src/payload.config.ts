@@ -11,6 +11,7 @@ import { migrations } from './migrations/index.ts'
 import { BikeCategories } from './collections/BikeCategories.ts'
 import { Brands } from './collections/Brands.ts'
 import { Conversations } from './collections/Conversations.ts'
+import { Customers } from './collections/Customers.ts'
 import { Enquiries } from './collections/Enquiries.ts'
 import { HeroSlides } from './collections/HeroSlides.ts'
 import { Media } from './collections/Media.ts'
@@ -54,6 +55,7 @@ export default buildConfig({
   },
   collections: [
     Users,
+    Customers,
     Media,
     Brands,
     BikeCategories,
