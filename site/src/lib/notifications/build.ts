@@ -139,6 +139,92 @@ export function buildOrderEmail(doc: Record<string, unknown>) {
   return { subject, text: lines.join("\n") }
 }
 
+/**
+ * Customer-facing order confirmation. Sent to the buyer's email at
+ * the same time as the staff notification fires. Friendlier tone,
+ * no PayPal capture id, no admin link, but full line-item breakdown
+ * so the customer has a receipt they can quote on the phone.
+ */
+export function buildCustomerOrderEmail(doc: Record<string, unknown>) {
+  const orderNumber = String(doc.orderNumber ?? doc.id)
+  const subject = `Order received — ${orderNumber} | Yamaha Parts Australia`
+
+  const aud = (n: unknown) => {
+    const v = typeof n === "number" ? n : Number(n)
+    return Number.isFinite(v)
+      ? `A$${v.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : "A$0.00"
+  }
+
+  const shippingMethod = String(doc.shippingMethod ?? "")
+  const isPickup = shippingMethod === "pickup"
+  const items = Array.isArray(doc.lineItems) ? (doc.lineItems as OrderLineItem[]) : []
+
+  const lines: string[] = [
+    `Hi ${doc.customerName ?? "there"},`,
+    "",
+    `Thanks for your order — we've got it and our parts team will pack it shortly.`,
+    "",
+    `Your order reference is ${orderNumber}. Quote it if you need to call us about this order.`,
+    "",
+    "----------------------------------------",
+    "Your order",
+    "----------------------------------------",
+  ]
+
+  for (const li of items) {
+    const sku = String(li.sku ?? "")
+    const name = String(li.name ?? "")
+    const qty = String(li.qty ?? "")
+    const unit = aud(li.unitPrice)
+    const total = aud(li.lineTotal)
+    lines.push(`  ${qty}× ${name}`)
+    lines.push(`      Part number: ${sku}`)
+    lines.push(`      ${unit} each — ${total}`)
+    lines.push("")
+  }
+
+  lines.push("----------------------------------------")
+  lines.push(`Subtotal:  ${aud(doc.subtotal)}`)
+  lines.push(`Shipping:  ${aud(doc.shipping)}`)
+  lines.push(`Total:     ${aud(doc.total)}  (paid via PayPal)`)
+  lines.push("----------------------------------------")
+  lines.push("")
+
+  if (isPickup) {
+    lines.push("Fulfilment:")
+    lines.push("  In-store pickup at our West Gosford workshop.")
+    lines.push("  We'll email you when your order is packed and ready to collect.")
+    lines.push("  169 Manns Road, West Gosford NSW 2250.")
+    lines.push("  Open Mon–Fri 8:30am–5:30pm, Sat 9am–1pm.")
+  } else {
+    const addr = [
+      doc.addressLine1,
+      doc.addressLine2,
+      doc.suburb,
+      [doc.state, doc.postcode].filter(Boolean).join(" "),
+      "Australia",
+    ]
+      .filter((p) => typeof p === "string" && p.length > 0)
+      .join(", ")
+    lines.push("Fulfilment:")
+    lines.push("  Shipping Australia-wide, flat rate.")
+    lines.push(`  To: ${addr || "(address pending — we'll be in touch)"}`)
+    lines.push("  Most orders ship within one business day.")
+  }
+
+  lines.push("")
+  lines.push("Need help, or want to add to your order?")
+  lines.push("  Call (02) 4331 9007 — Mon–Fri 8:30am–5:30pm, Sat 9am–1pm")
+  lines.push("  Email info@twowheelobsession.com.au")
+  lines.push("")
+  lines.push("Thanks again,")
+  lines.push("The Two Wheel Obsession team")
+  lines.push("Yamaha Parts Australia · yamahapartsaustralia.com.au")
+
+  return { subject, text: lines.join("\n") }
+}
+
 export function buildServiceRequestEmail(doc: Record<string, unknown>) {
   const id = doc.id
   const serviceType = String(doc.serviceType ?? "other")

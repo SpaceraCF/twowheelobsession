@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { buildOrderEmail } from '../lib/notifications/build.ts'
+import { buildCustomerOrderEmail, buildOrderEmail } from '../lib/notifications/build.ts'
 
 // Yamaha Parts Australia checkout orders. Customers pay via PayPal at
 // the parts site (yamahapartsaustralia.com.au) and the order lands here
@@ -29,16 +29,37 @@ export const Orders: CollectionConfig = {
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return
-        const to = process.env.PARTS_ORDER_NOTIFY_EMAIL
-        if (!to || !req.payload.email) return
-        try {
-          const { subject, text } = buildOrderEmail(doc as Record<string, unknown>)
-          await req.payload.sendEmail({ to, subject, text })
-        } catch (err) {
-          req.payload.logger.error(
-            { err },
-            '[Orders] notification email failed (order still saved)',
-          )
+        if (!req.payload.email) return
+        const orderDoc = doc as Record<string, unknown>
+
+        // Staff notification — goes to the parts inbox for fulfilment.
+        const staffTo = process.env.PARTS_ORDER_NOTIFY_EMAIL
+        if (staffTo) {
+          try {
+            const { subject, text } = buildOrderEmail(orderDoc)
+            await req.payload.sendEmail({ to: staffTo, subject, text })
+          } catch (err) {
+            req.payload.logger.error(
+              { err },
+              '[Orders] staff notification email failed (order still saved)',
+            )
+          }
+        }
+
+        // Customer confirmation — "we've got your order" with line-item
+        // receipt + fulfilment expectations. Best-effort; never block
+        // the order on a customer-email failure.
+        const customerTo = typeof orderDoc.customerEmail === 'string' ? orderDoc.customerEmail : ''
+        if (customerTo) {
+          try {
+            const { subject, text } = buildCustomerOrderEmail(orderDoc)
+            await req.payload.sendEmail({ to: customerTo, subject, text })
+          } catch (err) {
+            req.payload.logger.error(
+              { err },
+              '[Orders] customer confirmation email failed (order still saved)',
+            )
+          }
         }
       },
     ],
