@@ -98,11 +98,15 @@ services:
       # NEXT_PUBLIC_ prefix for any var referenced in client bundles.
       - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
         sync: false
-      # tawk.to live chat — free, no monthly fee. Both IDs come from
-      # the tawk.to dashboard. Leave unset to disable the chat widget.
-      - key: NEXT_PUBLIC_TAWK_PROPERTY_ID
+      # "Text us" SMS widget — replaces the legacy Podium flow. The
+      # widget pre-addresses an SMS to this number on the customer's
+      # phone; staff reply via the SMS-platform's mobile app
+      # (OpenPhone recommended — shared inbox, AU numbers,
+      # ~A$19/user/month). International format, SMS-capable.
+      # Leave unset to hide the widget.
+      - key: NEXT_PUBLIC_SMS_BUSINESS_NUMBER
         sync: false
-      - key: NEXT_PUBLIC_TAWK_WIDGET_ID
+      - key: NEXT_PUBLIC_SMS_DISPLAY
         sync: false
 
   - type: cron
