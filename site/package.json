@@ -22,6 +22,7 @@
     "@payloadcms/next": "^3.84.1",
     "@payloadcms/richtext-lexical": "^3.84.1",
     "@payloadcms/ui": "^3.84.1",
+    "@types/web-push": "^3.6.4",
     "graphql": "^16.13.2",
     "he": "^1.2.0",
     "next": "16.2.4",
@@ -29,7 +30,9 @@
     "payload": "^3.84.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "twilio": "^6.0.2",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

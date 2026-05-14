@@ -10,9 +10,11 @@ import { fileURLToPath } from 'url'
 import { migrations } from './migrations/index.ts'
 import { BikeCategories } from './collections/BikeCategories.ts'
 import { Brands } from './collections/Brands.ts'
+import { Conversations } from './collections/Conversations.ts'
 import { Enquiries } from './collections/Enquiries.ts'
 import { HeroSlides } from './collections/HeroSlides.ts'
 import { Media } from './collections/Media.ts'
+import { Messages } from './collections/Messages.ts'
 import { NewBikes } from './collections/NewBikes.ts'
 import { Orders } from './collections/Orders.ts'
 import { Pages } from './collections/Pages.ts'
@@ -55,6 +57,8 @@ export default buildConfig({
     Enquiries,
     ServiceRequests,
     Orders,
+    Conversations,
+    Messages,
     Pages,
     HeroSlides,
   ],

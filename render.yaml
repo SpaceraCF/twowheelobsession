@@ -98,16 +98,35 @@ services:
       # NEXT_PUBLIC_ prefix for any var referenced in client bundles.
       - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
         sync: false
-      # "Text us" SMS widget — replaces the legacy Podium flow. The
-      # widget pre-addresses an SMS to this number on the customer's
-      # phone; staff reply via the SMS-platform's mobile app
-      # (OpenPhone recommended — shared inbox, AU numbers,
-      # ~A$19/user/month). International format, SMS-capable.
-      # Leave unset to hide the widget.
+      # "Text us" widget customer-side display. Same number as
+      # TWILIO_PHONE_NUMBER below — split for visibility / safety.
       - key: NEXT_PUBLIC_SMS_BUSINESS_NUMBER
         sync: false
       - key: NEXT_PUBLIC_SMS_DISPLAY
         sync: false
+
+      # Twilio SMS inbox — custom shared-inbox built into Payload admin.
+      # Configure the number's inbound webhook in Twilio console to:
+      #   {SITE_URL}/api/twilio/sms-inbound
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+
+      # Web Push (VAPID) — generated once via
+      #   npx web-push generate-vapid-keys
+      # Public key goes in both VAPID_PUBLIC_KEY (server) and
+      # NEXT_PUBLIC_VAPID_PUBLIC_KEY (client). Private stays server-only.
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:info@twowheelobsession.com.au
 
   - type: cron
     name: twowo-yamaha-sync

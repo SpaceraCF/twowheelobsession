@@ -7,6 +7,7 @@ import * as migration_20260429_053253_add_color_image_url from './20260429_05325
 import * as migration_20260429_063949_extend_specs_and_description from './20260429_063949_extend_specs_and_description.ts'
 import * as migration_20260505_060257_hero_slides_and_finance from './20260505_060257_hero_slides_and_finance.ts'
 import * as migration_20260506_031225_add_orders from './20260506_031225_add_orders.ts'
+import * as migration_20260514_014232_add_sms_inbox from './20260514_014232_add_sms_inbox.ts'
 
 export const migrations = [
   {
@@ -33,5 +34,10 @@ export const migrations = [
     up: migration_20260506_031225_add_orders.up,
     down: migration_20260506_031225_add_orders.down,
     name: '20260506_031225_add_orders',
+  },
+  {
+    up: migration_20260514_014232_add_sms_inbox.up,
+    down: migration_20260514_014232_add_sms_inbox.down,
+    name: '20260514_014232_add_sms_inbox',
   },
 ]

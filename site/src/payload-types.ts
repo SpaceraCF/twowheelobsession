@@ -76,6 +76,8 @@ export interface Config {
     enquiries: Enquiry;
     'service-requests': ServiceRequest;
     orders: Order;
+    conversations: Conversation;
+    messages: Message;
     pages: Page;
     'hero-slides': HeroSlide;
     'payload-kv': PayloadKv;
@@ -94,6 +96,8 @@ export interface Config {
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     'service-requests': ServiceRequestsSelect<false> | ServiceRequestsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    messages: MessagesSelect<false> | MessagesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -136,13 +140,15 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Staff and admin accounts. Only admins can invite or remove users.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
   name?: string | null;
-  role?: ('admin' | 'staff') | null;
+  role: 'admin' | 'staff';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -661,6 +667,82 @@ export interface Order {
   createdAt: string;
 }
 /**
+ * Shared SMS inbox. Each row is a customer thread — open one to see the message history and reply. Replies go out as SMS from the dealer's Twilio number.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations".
+ */
+export interface Conversation {
+  id: number;
+  /**
+   * E.164 format, e.g. +61400000000.
+   */
+  phoneNumber: string;
+  /**
+   * Optional — set as the team learns the customer's name. Falls back to the phone number in lists.
+   */
+  displayName?: string | null;
+  /**
+   * Auto-computed: displayName if set, otherwise phoneNumber.
+   */
+  displayLabel?: string | null;
+  status?: ('open' | 'closed') | null;
+  /**
+   * Staff member responsible for replying.
+   */
+  assignedTo?: (number | null) | User;
+  lastMessageAt?: string | null;
+  /**
+   * First 120 chars of the most recent message in the thread.
+   */
+  lastMessagePreview?: string | null;
+  /**
+   * Inbound messages that haven't been opened by any staff member. Resets to 0 when a staff member opens the conversation.
+   */
+  unreadCount?: number | null;
+  /**
+   * Page the customer was on when they first opened the chat (captured from the TextUsWidget). Helps staff understand context.
+   */
+  firstInboundContext?: string | null;
+  /**
+   * Staff-only notes. Never sent to the customer.
+   */
+  internalNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Individual SMS records. The admin view lists every message across every conversation — use the Conversations view for a per-customer thread.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages".
+ */
+export interface Message {
+  id: number;
+  conversation: number | Conversation;
+  direction: 'inbound' | 'outbound';
+  body: string;
+  /**
+   * First 80 chars — used as the row title in admin lists.
+   */
+  preview?: string | null;
+  /**
+   * Twilio Message SID. Inbound: from the webhook payload. Outbound: from the Twilio API response when we sent it.
+   */
+  twilioMessageSid?: string | null;
+  status?: ('received' | 'queued' | 'sent' | 'delivered' | 'failed') | null;
+  /**
+   * Outbound only — which staff member typed and sent the reply.
+   */
+  sentBy?: (number | null) | User;
+  /**
+   * Twilio error if the SMS failed to send.
+   */
+  errorMessage?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -785,6 +867,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orders';
         value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'conversations';
+        value: number | Conversation;
+      } | null)
+    | ({
+        relationTo: 'messages';
+        value: number | Message;
       } | null)
     | ({
         relationTo: 'pages';
@@ -1183,6 +1273,40 @@ export interface OrdersSelect<T extends boolean = true> {
   paypalCaptureStatus?: T;
   paypalPayerEmail?: T;
   fulfilmentNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations_select".
+ */
+export interface ConversationsSelect<T extends boolean = true> {
+  phoneNumber?: T;
+  displayName?: T;
+  displayLabel?: T;
+  status?: T;
+  assignedTo?: T;
+  lastMessageAt?: T;
+  lastMessagePreview?: T;
+  unreadCount?: T;
+  firstInboundContext?: T;
+  internalNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages_select".
+ */
+export interface MessagesSelect<T extends boolean = true> {
+  conversation?: T;
+  direction?: T;
+  body?: T;
+  preview?: T;
+  twilioMessageSid?: T;
+  status?: T;
+  sentBy?: T;
+  errorMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }
