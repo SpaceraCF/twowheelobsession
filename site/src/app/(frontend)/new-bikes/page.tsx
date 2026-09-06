@@ -3,13 +3,23 @@ import config from "@payload-config"
 
 import { BikeCard } from "@/components/BikeCard"
 import { CatalogFilters } from "@/components/CatalogFilters"
+import { JsonLd } from "@/components/JsonLd"
+import { MAIN_SITE_URL, breadcrumbJsonLd } from "@/lib/seo/jsonld"
 
 type SearchParams = Promise<{ brand?: string; category?: string }>
 
 export const metadata = {
-  title: "Shop New Motorcycles — Yamaha, Suzuki, CFMOTO | Two Wheel Obsession",
+  title: "New Motorcycle Sales Central Coast — Yamaha, Suzuki, CFMOTO | Two Wheel Obsession",
   description:
-    "Browse the full Yamaha, Suzuki and CFMOTO new motorcycle range at Two Wheel Obsession.",
+    "New motorcycle sales on the NSW Central Coast. The full Yamaha, Suzuki and CFMOTO range at Two Wheel Obsession, West Gosford — ride-away pricing, finance and trade-ins welcome.",
+  alternates: { canonical: `${MAIN_SITE_URL}/new-bikes` },
+  openGraph: {
+    title: "New Motorcycle Sales Central Coast | Two Wheel Obsession",
+    description:
+      "The full Yamaha, Suzuki and CFMOTO new bike range at our West Gosford dealership.",
+    url: `${MAIN_SITE_URL}/new-bikes`,
+    type: "website",
+  },
 }
 
 export default async function NewBikesPage({ searchParams }: { searchParams: SearchParams }) {
@@ -71,13 +81,25 @@ export default async function NewBikesPage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="bg-zinc-50">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: MAIN_SITE_URL },
+          { name: "New Motorcycles", url: `${MAIN_SITE_URL}/new-bikes` },
+        ])}
+      />
       <div className="bg-white border-b border-zinc-200">
         <div className="max-w-[1400px] mx-auto px-6 py-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Shop</p>
-          <h1 className="mt-2 text-3xl md:text-4xl font-bold text-zinc-900">New Motorcycles</h1>
-          <p className="mt-3 text-zinc-700 max-w-2xl">
-            The full Yamaha range plus selected Suzuki and CFMOTO models. Yamaha new-bike data syncs
-            hourly direct from Yamaha Motor Australia.
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            Shop · West Gosford
+          </p>
+          <h1 className="mt-2 text-3xl md:text-4xl font-bold text-zinc-900">
+            New Motorcycle Sales — Central Coast
+          </h1>
+          <p className="mt-3 text-zinc-700 max-w-2xl leading-relaxed">
+            The full Yamaha range plus selected Suzuki and CFMOTO models, in stock
+            and on order at our West Gosford dealership. Yamaha pricing and specs
+            sync direct from Yamaha Motor Australia, so what you see here is
+            current. Finance and trade-ins welcome — <a href="tel:+61243319007" className="text-red-600 hover:underline">call (02) 4331 9007</a>.
           </p>
         </div>
       </div>

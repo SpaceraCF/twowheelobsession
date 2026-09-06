@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom"
 import { forgotPassword, type AuthState } from "@/lib/auth/actions"
 
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 export function ForgotForm() {
   const [state, formAction] = useActionState<AuthState | null, FormData>(forgotPassword, null)

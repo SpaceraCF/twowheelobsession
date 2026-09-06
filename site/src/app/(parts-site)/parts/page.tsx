@@ -14,8 +14,8 @@ export default function PartsHomePage() {
   return (
     <>
       <Hero />
-      <PillarStrip />
       <FinderSection />
+      <PillarStrip />
       <WhyUs />
       <ContactSection />
     </>
@@ -94,7 +94,7 @@ function Trust({ label }: { label: string }) {
 
 function PillarStrip() {
   return (
-    <section className="bg-white border-b border-zinc-200">
+    <section className="bg-zinc-50 border-b border-zinc-200">
       <div className="max-w-[1400px] mx-auto px-6 py-16">
         <div className="flex items-end justify-between flex-wrap gap-6 mb-10">
           <div>
@@ -197,7 +197,7 @@ function PillarCard({
 
 function FinderSection() {
   return (
-    <section id="finder" className="bg-zinc-50 border-b border-zinc-200 scroll-mt-20">
+    <section id="finder" className="bg-white border-b border-zinc-200 scroll-mt-20">
       <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
         <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
           <div className="max-w-2xl">
@@ -210,8 +210,8 @@ function FinderSection() {
             <p className="mt-3 text-zinc-600 leading-relaxed">
               Pick your model, year and section. Click into the exploded
               diagrams to see every part, its reference number, and indicative
-              price. When you've got the part numbers, send them through and
-              we'll quote shipping and confirm stock.
+              price. When you&apos;ve got the part numbers, send them through and
+              we&apos;ll quote shipping and confirm stock.
             </p>
           </div>
           <Link
@@ -287,11 +287,11 @@ function ContactSection() {
             Step 2 · Send us the part numbers
           </p>
           <h2 className="mt-3 text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900">
-            Can't find it? We'll find it for you.
+            Can&apos;t find it? We&apos;ll find it for you.
           </h2>
           <p className="mt-4 text-zinc-700 leading-relaxed">
-            Tell us your bike (year, model, VIN if you have it) and what you're
-            after. We'll come back with stock, price, and shipping.
+            Tell us your bike (year, model, VIN if you have it) and what you&apos;re
+            after. We&apos;ll come back with stock, price, and shipping.
           </p>
 
           <dl className="mt-8 space-y-5 text-sm">

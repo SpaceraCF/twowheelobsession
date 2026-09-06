@@ -40,14 +40,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/oem-parts-finder`,   changeFrequency: "weekly",  priority: 0.7,  lastModified: now },
     { url: `${siteUrl}/service-and-repairs`, changeFrequency: "monthly", priority: 0.6, lastModified: now },
     { url: `${siteUrl}/contact-us`,         changeFrequency: "yearly",  priority: 0.5,  lastModified: now },
+    { url: `${siteUrl}/news`,               changeFrequency: "weekly",  priority: 0.6,  lastModified: now },
   ]
 
-  // Bike detail routes — pull from Payload. Fail silently if DB isn't reachable
-  // at request time (sitemap is fetched ahead of build sometimes).
+  // Bike + post detail routes — pull from Payload. Fail silently if the DB
+  // isn't reachable at request time (sitemap is fetched ahead of build
+  // sometimes).
   let bikeEntries: MetadataRoute.Sitemap = []
   try {
     const payload = await getPayload({ config })
-    const [newBikes, usedBikes] = await Promise.all([
+    const [newBikes, usedBikes, posts] = await Promise.all([
       payload.find({
         collection: "new-bikes",
         where: { status: { equals: "available" } },
@@ -57,6 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       payload.find({
         collection: "used-bikes",
         where: { listingStatus: { in: ["available", "on-hold"] } },
+        limit: 500,
+        depth: 0,
+      }),
+      payload.find({
+        collection: "posts",
+        where: { _status: { equals: "published" } },
         limit: 500,
         depth: 0,
       }),
@@ -75,9 +83,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "daily" as const,
         priority: 0.7,
       })),
+      ...posts.docs.map((p) => ({
+        url: `${siteUrl}/news/${p.slug}`,
+        lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      })),
     ]
   } catch (err) {
-    console.warn("[sitemap] Could not load bikes:", err instanceof Error ? err.message : err)
+    console.warn("[sitemap] Could not load bikes/posts:", err instanceof Error ? err.message : err)
   }
 
   return [...staticEntries, ...bikeEntries]

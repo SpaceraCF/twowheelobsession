@@ -19,6 +19,7 @@ import { Messages } from './collections/Messages.ts'
 import { NewBikes } from './collections/NewBikes.ts'
 import { Orders } from './collections/Orders.ts'
 import { Pages } from './collections/Pages.ts'
+import { Posts } from './collections/Posts.ts'
 import { ServiceRequests } from './collections/ServiceRequests.ts'
 import { UsedBikes } from './collections/UsedBikes.ts'
 import { Users } from './collections/Users.ts'
@@ -67,6 +68,7 @@ export default buildConfig({
     Conversations,
     Messages,
     Pages,
+    Posts,
     HeroSlides,
   ],
   editor: lexicalEditor(),

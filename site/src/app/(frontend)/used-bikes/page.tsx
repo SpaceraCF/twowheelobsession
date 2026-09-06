@@ -4,13 +4,22 @@ import config from "@payload-config"
 
 import { CatalogFilters } from "@/components/CatalogFilters"
 import { UsedBikeCard } from "@/components/UsedBikeCard"
+import { MAIN_SITE_URL } from "@/lib/seo/jsonld"
 
 type SearchParams = Promise<{ brand?: string; category?: string; bodyType?: string }>
 
 export const metadata = {
-  title: "Motorcycle Runouts — Used & Demo Bikes | Two Wheel Obsession",
+  title: "Used Motorcycles Central Coast — Runouts & Demo Bikes | Two Wheel Obsession",
   description:
-    "Quality used and demo motorcycles at Two Wheel Obsession. Yamaha, Suzuki, CFMOTO and more.",
+    "Used and demo motorcycles for sale on the NSW Central Coast. Yamaha, Suzuki, CFMOTO and more at Two Wheel Obsession, West Gosford — every bike workshop-checked before it's listed.",
+  alternates: { canonical: `${MAIN_SITE_URL}/used-bikes` },
+  openGraph: {
+    title: "Used Motorcycles Central Coast | Two Wheel Obsession",
+    description:
+      "Quality used and demo motorcycles at our West Gosford dealership.",
+    url: `${MAIN_SITE_URL}/used-bikes`,
+    type: "website",
+  },
 }
 
 export default async function UsedBikesPage({ searchParams }: { searchParams: SearchParams }) {
@@ -100,7 +109,7 @@ export default async function UsedBikesPage({ searchParams }: { searchParams: Se
             <div className="border border-dashed border-zinc-300 rounded-lg p-10 text-center bg-white">
               <h2 className="text-xl font-semibold text-zinc-900">No used bikes listed right now</h2>
               <p className="mt-3 text-zinc-700 max-w-md mx-auto">
-                We turn over runouts quickly. Get in touch to ask about what's just landed or coming
+                We turn over runouts quickly. Get in touch to ask about what&apos;s just landed or coming
                 in soon.
               </p>
               <div className="mt-6 flex flex-wrap gap-3 justify-center">

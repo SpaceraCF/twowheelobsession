@@ -3,8 +3,11 @@
   "configurations": [
     {
       "name": "site",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "site", "run", "dev"],
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/christian@calystro.com/Documents/Containers/TWO-Website/site && export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm use 22 >/dev/null && exec npx next dev"
+      ],
       "port": 3000
     }
   ]

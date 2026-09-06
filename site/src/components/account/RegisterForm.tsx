@@ -7,7 +7,7 @@ import { useFormStatus } from "react-dom"
 import { registerCustomer, type AuthState } from "@/lib/auth/actions"
 
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 export function RegisterForm() {
   const [state, formAction] = useActionState<AuthState | null, FormData>(registerCustomer, null)
@@ -18,7 +18,7 @@ export function RegisterForm() {
         <h3 className="font-semibold text-emerald-900">Almost done</h3>
         <p className="mt-2 text-sm text-emerald-800">{state.notice}</p>
         <p className="mt-3 text-xs text-emerald-700">
-          Didn't get the email? Check spam, or{" "}
+          Didn&apos;t get the email? Check spam, or{" "}
           <Link href="/account/login" className="underline">
             try signing in
           </Link>{" "}

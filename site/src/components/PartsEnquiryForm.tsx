@@ -13,7 +13,7 @@ import { submitEnquiry, type EnquiryState } from "@/lib/actions/enquiry"
 // distinguishable via the `pageUrl` field.
 
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 export function PartsEnquiryForm() {
   const [pageUrl, setPageUrl] = useState<string>("")
@@ -30,7 +30,7 @@ export function PartsEnquiryForm() {
           Thanks — parts enquiry sent
         </h3>
         <p className="mt-3 text-emerald-800">
-          We'll come back with stock, price and shipping shortly. For urgent
+          We&apos;ll come back with stock, price and shipping shortly. For urgent
           orders call{" "}
           <a href="tel:+61243319007" className="font-semibold underline">
             (02) 4331 9007
@@ -66,7 +66,7 @@ export function PartsEnquiryForm() {
 
       <div>
         <label htmlFor="message" className="block text-sm font-medium text-zinc-900">
-          Parts you're after <span className="text-red-600">*</span>
+          Parts you&apos;re after <span className="text-red-600">*</span>
         </label>
         <textarea
           id="message"
@@ -86,7 +86,7 @@ export function PartsEnquiryForm() {
       <SubmitButton />
 
       <p className="text-xs text-zinc-500">
-        We'll reply by email within one business day. For anything urgent, call
+        We&apos;ll reply by email within one business day. For anything urgent, call
         the workshop direct.
       </p>
     </form>

@@ -70,7 +70,7 @@ export function ServiceRequestForm() {
           name="serviceType"
           required
           defaultValue=""
-          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
         >
           <option value="" disabled>Select…</option>
           {SERVICE_TYPES.map((opt) => (
@@ -84,7 +84,7 @@ export function ServiceRequestForm() {
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-zinc-900">
-          What's going on? <span className="text-red-600">*</span>
+          What&apos;s going on? <span className="text-red-600">*</span>
         </label>
         <textarea
           id="description"
@@ -92,7 +92,7 @@ export function ServiceRequestForm() {
           required
           rows={5}
           placeholder="Tell us as much as you can — symptoms, recent work, deadlines."
-          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+          className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
         />
         {state?.fieldErrors?.description && (
           <p className="mt-1 text-xs text-red-700">{state.fieldErrors.description}</p>
@@ -138,7 +138,7 @@ function Field({
         required={required}
         min={min}
         max={max}
-        className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+        className="mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
       />
       {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
     </div>

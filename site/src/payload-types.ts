@@ -81,6 +81,7 @@ export interface Config {
     conversations: Conversation;
     messages: Message;
     pages: Page;
+    posts: Post;
     'hero-slides': HeroSlide;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -102,6 +103,7 @@ export interface Config {
     conversations: ConversationsSelect<false> | ConversationsSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -878,6 +880,57 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Workshop write-ups, dealership news and buying guides. Published posts appear at /news and in the Latest News block on the homepage.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * Auto-filled from the title. Leave it alone once the post is live.
+   */
+  slug?: string | null;
+  postType?: ('workshop' | 'news' | 'guide') | null;
+  /**
+   * Controls ordering on /news.
+   */
+  publishedAt?: string | null;
+  /**
+   * Who wrote it — e.g. "Nikkie" or "The workshop".
+   */
+  author?: string | null;
+  /**
+   * One or two sentences. Shows on the news index, the homepage cards, and in Google results.
+   */
+  excerpt?: string | null;
+  heroImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  bikeMake?: string | null;
+  bikeModel?: string | null;
+  bikeYear?: number | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * Homepage hero banners. Lower Order numbers appear first. Toggle Active off to hide a slide without deleting it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -991,6 +1044,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'hero-slides';
@@ -1498,6 +1555,28 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  postType?: T;
+  publishedAt?: T;
+  author?: T;
+  excerpt?: T;
+  heroImage?: T;
+  content?: T;
+  bikeMake?: T;
+  bikeModel?: T;
+  bikeYear?: T;
+  seoTitle?: T;
+  seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

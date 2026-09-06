@@ -28,7 +28,7 @@ const FINANCE_TERMS = [
 // without making them indistinguishable from real input. Inheriting the
 // page's text color was rendering both too light on white.
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 export function EnquiryForm() {
   const params = useSearchParams()
@@ -59,7 +59,7 @@ export function EnquiryForm() {
       <div className="bg-emerald-50 border border-emerald-200 p-8 text-center">
         <h3 className="text-xl font-semibold text-emerald-900">Thanks — message sent</h3>
         <p className="mt-3 text-emerald-800">
-          We'll be in touch shortly. For urgent enquiries call{" "}
+          We&apos;ll be in touch shortly. For urgent enquiries call{" "}
           <a href="tel:+61243319007" className="font-semibold underline">
             (02) 4331 9007
           </a>
@@ -81,7 +81,7 @@ export function EnquiryForm() {
 
       <div>
         <label htmlFor="type" className="block text-sm font-medium text-zinc-900">
-          What's your enquiry about? <span className="text-red-600">*</span>
+          What&apos;s your enquiry about? <span className="text-red-600">*</span>
         </label>
         <select
           id="type"

@@ -14,7 +14,7 @@ import {
 } from "@/lib/cart/types"
 
 const FIELD_CLASS =
-  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+  "mt-1 block w-full border border-zinc-300 rounded px-3 py-2 text-base md:text-sm bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
 
 type CheckoutFlowProps = {
   paypalClientId: string | null
@@ -312,14 +312,14 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
         ) : (
           <div className="bg-amber-50 border border-amber-200 p-4 rounded">
             <p className="text-sm font-semibold text-amber-900">
-              Online checkout isn't switched on yet
+              Online checkout isn&apos;t switched on yet
             </p>
             <p className="mt-1 text-sm text-amber-800">
-              We're configuring PayPal — for now, please call us on{" "}
+              We&apos;re configuring PayPal — for now, please call us on{" "}
               <a href="tel:+61243319007" className="font-semibold underline">
                 (02) 4331 9007
               </a>{" "}
-              or send a parts enquiry and we'll process your order over the phone.
+              or send a parts enquiry and we&apos;ll process your order over the phone.
             </p>
           </div>
         )}

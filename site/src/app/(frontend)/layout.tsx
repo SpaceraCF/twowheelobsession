@@ -68,6 +68,9 @@ export default function RootLayout({
           data={websiteJsonLd({
             url: "https://www.twowheelobsession.com.au",
             name: "Two Wheel Obsession",
+            // Makes the site eligible for Google's sitelinks search box
+            // now that /search exists.
+            searchPath: "/search",
           })}
         />
         {/* CartProvider wraps the whole tree so the EPC widget's

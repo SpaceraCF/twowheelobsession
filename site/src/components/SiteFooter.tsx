@@ -131,6 +131,17 @@ function FooterMain() {
               yamahapartsaustralia.com.au →
             </a>
           </div>
+          <nav aria-label="More" className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            <Link href="/service-and-repairs" className="text-zinc-700 hover:text-red-600">
+              Service &amp; Repairs
+            </Link>
+            <Link href="/news" className="text-zinc-700 hover:text-red-600">
+              News
+            </Link>
+            <Link href="/contact-us" className="text-zinc-700 hover:text-red-600">
+              Contact
+            </Link>
+          </nav>
         </div>
       </div>
     </section>
