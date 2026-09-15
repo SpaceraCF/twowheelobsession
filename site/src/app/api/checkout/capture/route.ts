@@ -33,8 +33,8 @@ export async function POST(request: Request) {
 
   const b = body as Record<string, unknown> | null
   const paypalOrderId = String(b?.paypalOrderId ?? "").trim()
-  if (!paypalOrderId) {
-    return NextResponse.json({ error: "Missing paypalOrderId." }, { status: 400 })
+  if (!/^[A-Z0-9]{10,32}$/i.test(paypalOrderId)) {
+    return NextResponse.json({ error: "Invalid paypalOrderId." }, { status: 400 })
   }
 
   const parsed = validateCheckoutInput(body)

@@ -62,7 +62,8 @@ export async function quoteYamahaPart(rawSku: string): Promise<PartQuoteResult> 
 
     const part = (parsed as EpcPart[]).find((candidate) => {
       const effectiveSku = normaliseSku(candidate.SsPartNo) || normaliseSku(candidate.PartNo)
-      return effectiveSku === sku && candidate.Discontinued !== true
+      const discontinued = candidate.Discontinued === true || candidate.Discontinued === 1 || candidate.Discontinued === 'true'
+      return effectiveSku === sku && !discontinued
     })
     if (!part) return { ok: false, reason: 'not_found' }
 
@@ -86,4 +87,3 @@ export async function quoteYamahaPart(rawSku: string): Promise<PartQuoteResult> 
     return { ok: false, reason: 'unavailable' }
   }
 }
-

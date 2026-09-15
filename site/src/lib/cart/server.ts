@@ -165,11 +165,19 @@ export async function priceCheckoutInput(
     return { ok: false, status: 400, error: `Part ${missing.item.sku} is unavailable.`, field: "lineItems" }
   }
 
-  const lineItems: CartLineItem[] = quoted.map(({ item, result }) => ({
-    ...(result.ok ? result.quote : item),
-    qty: item.qty,
-    bikeContext: item.bikeContext,
-  }))
+  const lineItems: CartLineItem[] = []
+  for (const { item, result } of quoted) {
+    // Keep this guard even after the aggregate checks above: there must never
+    // be a code path that falls back to a caller-provided name or price.
+    if (!result.ok) {
+      return { ok: false, status: 502, error: "Could not verify current parts pricing. Please try again." }
+    }
+    lineItems.push({
+      ...result.quote,
+      qty: item.qty,
+      bikeContext: item.bikeContext,
+    })
+  }
   const subtotal = round2(lineItems.reduce((sum, item) => sum + item.unitPrice * item.qty, 0))
   const shipping = shippingCostFor(validation.input.shippingMethod)
 
