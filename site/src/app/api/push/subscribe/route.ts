@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import { headers } from 'next/headers'
 import config from '@payload-config'
+import { isStaffUser } from '@/lib/auth/staff'
 
 // Store a browser Web Push subscription on the current user's
 // `pushSubscriptions` array. Called by PushSetup when a staff member
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
   const payload = await getPayload({ config })
   const hdrs = await headers()
   const { user } = await payload.auth({ headers: hdrs })
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!isStaffUser(user)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   let json: PushSubscriptionJSON
   try {

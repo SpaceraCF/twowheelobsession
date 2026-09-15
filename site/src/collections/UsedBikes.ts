@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 export const UsedBikes: CollectionConfig = {
   slug: 'used-bikes',
@@ -7,6 +8,7 @@ export const UsedBikes: CollectionConfig = {
     defaultColumns: ['thumb', 'stockNumber', 'displayName', 'year', 'kms', 'price', 'listingStatus', 'updatedAt'],
     group: 'Bikes',
   },
+  access: { create: staffOnly, read: staffOnly, update: staffOnly, delete: staffOnly },
   versions: { drafts: { autosave: { interval: 800 } } },
   fields: [
     {

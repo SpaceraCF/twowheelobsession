@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOnly, staffOnly } from '../lib/auth/staff.ts'
 
 // One row per SMS (inbound or outbound). Linked to a Conversation by
 // `conversation`. Inbound rows come from the Twilio webhook; outbound
@@ -21,12 +22,10 @@ export const Messages: CollectionConfig = {
     // Same as Conversations — server-side webhook creates inbound;
     // staff create outbound via the send-sms endpoint (which uses
     // the local API, bypasses access). Staff can read all messages.
-    create: ({ req }) => Boolean(req.user),
-    read: ({ req }) => Boolean(req.user),
-    update: ({ req }) =>
-      Boolean(req.user && (req.user as { role?: string }).role === 'admin'),
-    delete: ({ req }) =>
-      Boolean(req.user && (req.user as { role?: string }).role === 'admin'),
+    create: staffOnly,
+    read: staffOnly,
+    update: adminOnly,
+    delete: adminOnly,
   },
   fields: [
     {

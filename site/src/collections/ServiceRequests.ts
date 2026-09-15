@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 import { buildServiceRequestEmail } from '../lib/notifications/build.ts'
 
@@ -11,6 +12,9 @@ export const ServiceRequests: CollectionConfig = {
   },
   access: {
     create: () => true,
+    read: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   hooks: {
     beforeChange: [

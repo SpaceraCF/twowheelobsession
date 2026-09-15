@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -19,6 +20,9 @@ export const Media: CollectionConfig = {
   // the public can't upload via the REST API.
   access: {
     read: () => true,
+    create: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   upload: {
     // In production on Render this is /var/data/media (a persistent disk).

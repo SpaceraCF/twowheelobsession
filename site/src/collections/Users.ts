@@ -1,4 +1,5 @@
-import type { Access, CollectionConfig, FieldAccess } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+import { adminOnly, adminOnlyField, isAdminUser, isStaffUser } from '../lib/auth/staff.ts'
 
 // Only admin-role users can invite, edit, or remove other users.
 // Staff can still see their own row (so the admin profile page
@@ -7,15 +8,9 @@ import type { Access, CollectionConfig, FieldAccess } from 'payload'
 // Collection-level `Access` returns true / false / a `Where` query
 // (allow only matching docs). Field-level `FieldAccess` returns
 // boolean only — no Where clause — so we keep two flavours.
-const isAdmin: Access = ({ req: { user } }) =>
-  Boolean(user && (user as { role?: string }).role === 'admin')
-
-const isAdminField: FieldAccess = ({ req: { user } }) =>
-  Boolean(user && (user as { role?: string }).role === 'admin')
-
 const isAdminOrSelf: Access = ({ req: { user } }) => {
-  if (!user) return false
-  if ((user as { role?: string }).role === 'admin') return true
+  if (!user || !isStaffUser(user)) return false
+  if (isAdminUser(user)) return true
   // Staff can read / update their own user record only.
   return { id: { equals: user.id } }
 }
@@ -30,8 +25,8 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   access: {
-    create: isAdmin,
-    delete: isAdmin,
+    create: adminOnly,
+    delete: adminOnly,
     update: isAdminOrSelf,
     read: isAdminOrSelf,
     // Admin-only access also covers any future field-level checks via
@@ -52,7 +47,7 @@ export const Users: CollectionConfig = {
       access: {
         // Only admins can change a user's role — prevents staff from
         // self-promoting on their own profile page.
-        update: isAdminField,
+        update: adminOnlyField,
       },
     },
     {

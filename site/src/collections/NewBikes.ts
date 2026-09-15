@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 export const NewBikes: CollectionConfig = {
   slug: 'new-bikes',
@@ -7,6 +8,7 @@ export const NewBikes: CollectionConfig = {
     defaultColumns: ['thumb', 'displayName', 'brand', 'category', 'year', 'price', 'status', 'source'],
     group: 'Bikes',
   },
+  access: { create: staffOnly, read: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [
     {
       // UI-only — no DB column. The custom Cell renders the bike's

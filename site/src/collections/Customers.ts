@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { isAdminUser } from '../lib/auth/staff.ts'
 
 // Customer accounts — completely separate from `Users` (which is for
 // staff). Customers self-register from the public site, manage their
@@ -67,25 +68,19 @@ export const Customers: CollectionConfig = {
     create: () => true, // public registration
     read: ({ req: { user } }) => {
       if (!user) return false
-      if ((user as { collection?: string }).collection === 'users') {
-        return (user as { role?: string }).role === 'admin'
-      }
+      if ((user as { collection?: string }).collection === 'users') return isAdminUser(user)
+      if ((user as { collection?: string }).collection !== 'customers') return false
       // Customer reading themselves
       return { id: { equals: user.id } }
     },
     update: ({ req: { user } }) => {
       if (!user) return false
-      if ((user as { collection?: string }).collection === 'users') {
-        return (user as { role?: string }).role === 'admin'
-      }
+      if ((user as { collection?: string }).collection === 'users') return isAdminUser(user)
+      if ((user as { collection?: string }).collection !== 'customers') return false
       return { id: { equals: user.id } }
     },
     delete: ({ req: { user } }) =>
-      Boolean(
-        user &&
-          (user as { collection?: string }).collection === 'users' &&
-          (user as { role?: string }).role === 'admin',
-      ),
+      isAdminUser(user),
   },
   fields: [
     // Auth fields (email, password, _verified, etc.) are added by
