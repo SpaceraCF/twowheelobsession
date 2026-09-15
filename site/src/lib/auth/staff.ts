@@ -7,7 +7,10 @@ type PayloadIdentity = {
 
 /** Customer sessions are authenticated too; staff gates must check collection. */
 export function isStaffUser(user: PayloadIdentity): boolean {
-  return user?.collection === 'users'
+  return (
+    user?.collection === 'users' &&
+    (user.role === 'staff' || user.role === 'admin')
+  )
 }
 
 export function isAdminUser(user: PayloadIdentity): boolean {
@@ -17,4 +20,3 @@ export function isAdminUser(user: PayloadIdentity): boolean {
 export const staffOnly: Access = ({ req: { user } }) => isStaffUser(user)
 export const adminOnly: Access = ({ req: { user } }) => isAdminUser(user)
 export const adminOnlyField: FieldAccess = ({ req: { user } }) => isAdminUser(user)
-
