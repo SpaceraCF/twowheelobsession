@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 import { getPayload } from "payload"
 import config from "@payload-config"
 
-import { generateOrderNumber, validateCheckoutInput } from "@/lib/cart/server"
-import { capturePayPalOrder, getPayPalConfig } from "@/lib/paypal/client"
+import { generateOrderNumber, priceCheckoutInput, validateCheckoutInput } from "@/lib/cart/server"
+import { capturePayPalOrder, getPayPalConfig, getPayPalOrder } from "@/lib/paypal/client"
 
 // Captures a PayPal order, verifies the captured amount matches what
 // the customer was expecting, writes an Order to Payload, and lets
@@ -37,9 +37,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing paypalOrderId." }, { status: 400 })
   }
 
-  const v = validateCheckoutInput(body)
+  const parsed = validateCheckoutInput(body)
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error, field: parsed.field }, { status: 400 })
+  }
+  const v = await priceCheckoutInput(parsed)
   if (!v.ok) {
-    return NextResponse.json({ error: v.error, field: v.field }, { status: 400 })
+    return NextResponse.json({ error: v.error, field: v.field }, { status: v.status ?? 400 })
+  }
+
+  // Check the server-priced cart against PayPal before capture. This prevents
+  // both price tampering and swapping in a different same-total order ID.
+  const paypalOrder = await getPayPalOrder(paypalOrderId)
+  if (!paypalOrder.ok) {
+    return NextResponse.json({ error: "Could not verify the PayPal order." }, { status: 502 })
+  }
+  const expectedItems = v.input.lineItems
+    .map((item) => `${item.sku}|${item.name.slice(0, 127)}|${item.qty}|${item.unitPrice.toFixed(2)}`)
+    .sort()
+  const actualItems = paypalOrder.items
+    .map((item) => `${item.sku ?? ""}|${item.name ?? ""}|${item.quantity ?? ""}|${Number(item.unit_amount?.value).toFixed(2)}`)
+    .sort()
+  const orderMatches =
+    paypalOrder.currency === "AUD" &&
+    Number.isFinite(Number(paypalOrder.amount)) &&
+    Math.abs(Number(paypalOrder.amount) - v.total) <= 0.01 &&
+    expectedItems.length === actualItems.length &&
+    expectedItems.every((item, index) => item === actualItems[index])
+  if (!orderMatches) {
+    return NextResponse.json(
+      { error: "Cart details no longer match the approved PayPal order. Start checkout again." },
+      { status: 409 },
+    )
   }
 
   const captureResult = await capturePayPalOrder(paypalOrderId)

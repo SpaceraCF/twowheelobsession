@@ -206,3 +206,43 @@ export async function capturePayPalOrder(paypalOrderId: string) {
     raw: data,
   }
 }
+
+export async function getPayPalOrder(paypalOrderId: string) {
+  const cfg = getPayPalConfig()
+  if (!cfg.ok) return cfg
+
+  const token = await getAccessToken(cfg)
+  const res = await fetch(
+    `${cfg.baseUrl}/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  )
+  if (!res.ok) {
+    return {
+      ok: false as const,
+      reason: "paypal_lookup_failed" as const,
+      message: `PayPal order lookup failed (${res.status})`,
+    }
+  }
+
+  const data = (await res.json()) as {
+    purchase_units?: Array<{
+      amount?: { value?: string; currency_code?: string }
+      items?: Array<{
+        sku?: string
+        name?: string
+        quantity?: string
+        unit_amount?: { value?: string; currency_code?: string }
+      }>
+    }>
+  }
+  const unit = data.purchase_units?.[0]
+  return {
+    ok: true as const,
+    amount: unit?.amount?.value,
+    currency: unit?.amount?.currency_code,
+    items: unit?.items ?? [],
+  }
+}
