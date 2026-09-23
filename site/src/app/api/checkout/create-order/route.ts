@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
+import { randomUUID } from "node:crypto"
 
-import { validateCheckoutInput } from "@/lib/cart/server"
+import { priceCheckoutInput, validateCheckoutInput } from "@/lib/cart/server"
+import { createCheckoutToken } from "@/lib/cart/checkout-token"
 import { createPayPalOrder, getPayPalConfig } from "@/lib/paypal/client"
 
 // Server endpoint that validates the cart + customer details, then
@@ -31,16 +33,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
-  const v = validateCheckoutInput(body)
+  const parsed = validateCheckoutInput(body)
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error, field: parsed.field }, { status: 400 })
+  }
+  const v = await priceCheckoutInput(parsed)
   if (!v.ok) {
-    return NextResponse.json({ error: v.error, field: v.field }, { status: 400 })
+    return NextResponse.json({ error: v.error, field: v.field }, { status: v.status ?? 400 })
   }
 
-  // The internal reference is what we'll match the capture against.
-  // PayPal stores it as `custom_id` on the order and echoes it back
-  // in the capture response, so we don't need any server-side session
-  // state between create and capture.
-  const internalReference = `cart-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  // Bind PayPal's custom_id to a signed, expiring checkout context.
+  const internalReference = `cart-${randomUUID()}`
 
   const result = await createPayPalOrder({
     lineItems: v.input.lineItems,
@@ -63,6 +66,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     paypalOrderId: result.orderId,
-    internalReference,
+    checkoutToken: createCheckoutToken(v, result.orderId, internalReference, cfg.clientSecret),
   })
 }

@@ -7,10 +7,13 @@ import {
   type ShippingMethod,
   shippingCostFor,
 } from "./types"
+import { quoteYamahaPart } from "@/lib/epc/quote"
 
 const VALID_SHIPPING: ShippingMethod[] = ["au-flat", "pickup"]
 
 const VALID_AU_STATES = new Set(["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"])
+const MAX_LINE_ITEMS = 25
+const MAX_QUANTITY = 20
 
 export type CheckoutCustomer = {
   name: string
@@ -37,6 +40,8 @@ export type CheckoutValidation =
   | { ok: true; input: CheckoutInput; subtotal: number; shipping: number; total: number }
   | { ok: false; error: string; field?: string }
 
+export type CheckoutPricing = CheckoutValidation & { status?: 400 | 502 }
+
 export function validateCheckoutInput(raw: unknown): CheckoutValidation {
   if (typeof raw !== "object" || raw === null) {
     return { ok: false, error: "Invalid request body." }
@@ -50,11 +55,15 @@ export function validateCheckoutInput(raw: unknown): CheckoutValidation {
   const email = String(c.email ?? "").trim()
   const phone = String(c.phone ?? "").trim()
   if (!name) return { ok: false, error: "Name required.", field: "customer.name" }
+  if (name.length > 120) return { ok: false, error: "Name is too long.", field: "customer.name" }
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return { ok: false, error: "Valid email required.", field: "customer.email" }
   }
   if (!phone || phone.replace(/\D/g, "").length < 6) {
     return { ok: false, error: "Phone required.", field: "customer.phone" }
+  }
+  if (email.length > 254 || phone.length > 40) {
+    return { ok: false, error: "Customer details are too long.", field: "customer" }
   }
 
   // Shipping method
@@ -88,6 +97,9 @@ export function validateCheckoutInput(raw: unknown): CheckoutValidation {
   if (!Array.isArray(r.lineItems) || r.lineItems.length === 0) {
     return { ok: false, error: "Cart is empty.", field: "lineItems" }
   }
+  if (r.lineItems.length > MAX_LINE_ITEMS) {
+    return { ok: false, error: `Cart can contain at most ${MAX_LINE_ITEMS} items.`, field: "lineItems" }
+  }
   const lineItems: CartLineItem[] = []
   for (const it of r.lineItems as unknown[]) {
     if (typeof it !== "object" || it === null) {
@@ -102,7 +114,7 @@ export function validateCheckoutInput(raw: unknown): CheckoutValidation {
     if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
       return { ok: false, error: `Invalid price for ${sku}.`, field: "lineItems" }
     }
-    if (!Number.isFinite(qty) || qty < 1) {
+    if (!Number.isFinite(qty) || qty < 1 || qty > MAX_QUANTITY) {
       return { ok: false, error: `Invalid qty for ${sku}.`, field: "lineItems" }
     }
     lineItems.push({
@@ -129,6 +141,52 @@ export function validateCheckoutInput(raw: unknown): CheckoutValidation {
     subtotal,
     shipping,
     total,
+  }
+}
+
+/** Replace every client-supplied SKU/name/price with the live EPC quote. */
+export async function priceCheckoutInput(
+  validation: Extract<CheckoutValidation, { ok: true }>,
+): Promise<CheckoutPricing> {
+  const quoted = await Promise.all(
+    validation.input.lineItems.map(async (item) => ({
+      item,
+      result: await quoteYamahaPart(item.sku),
+    })),
+  )
+
+  const unavailable = quoted.find(({ result }) => !result.ok && result.reason === "unavailable")
+  if (unavailable) {
+    return { ok: false, status: 502, error: "Could not verify current parts pricing. Please try again." }
+  }
+
+  const missing = quoted.find(({ result }) => !result.ok)
+  if (missing) {
+    return { ok: false, status: 400, error: `Part ${missing.item.sku} is unavailable.`, field: "lineItems" }
+  }
+
+  const lineItems: CartLineItem[] = []
+  for (const { item, result } of quoted) {
+    // Keep this guard even after the aggregate checks above: there must never
+    // be a code path that falls back to a caller-provided name or price.
+    if (!result.ok) {
+      return { ok: false, status: 502, error: "Could not verify current parts pricing. Please try again." }
+    }
+    lineItems.push({
+      ...result.quote,
+      qty: item.qty,
+      bikeContext: item.bikeContext,
+    })
+  }
+  const subtotal = round2(lineItems.reduce((sum, item) => sum + item.unitPrice * item.qty, 0))
+  const shipping = shippingCostFor(validation.input.shippingMethod)
+
+  return {
+    ok: true,
+    input: { ...validation.input, lineItems },
+    subtotal,
+    shipping,
+    total: round2(subtotal + shipping),
   }
 }
 

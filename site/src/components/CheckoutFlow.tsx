@@ -10,7 +10,6 @@ import {
   type ShippingMethod,
   SHIPPING_OPTIONS,
   fmtAud,
-  shippingCostFor,
 } from "@/lib/cart/types"
 
 const FIELD_CLASS =
@@ -71,7 +70,7 @@ export function CheckoutFlow({ paypalClientId, paypalEnv }: CheckoutFlowProps) {
 }
 
 function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | null; paypalEnv: string }) {
-  const { items, subtotal } = useCart()
+  const { items } = useCart()
   const router = useRouter()
   const buttonRef = useRef<HTMLDivElement | null>(null)
   const renderedRef = useRef(false)
@@ -90,9 +89,6 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
   const [state, setState] = useState("NSW")
   const [postcode, setPostcode] = useState("")
 
-  const shipping = shippingCostFor(shippingMethod)
-  const total = subtotal + shipping
-
   // Build the request body once per state change so the PayPal callbacks
   // see the freshest values without re-binding the buttons.
   const bodyRef = useRef({
@@ -104,17 +100,26 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
         : undefined,
     lineItems: items,
   })
-  bodyRef.current = {
-    customer: { name, email, phone },
-    shippingMethod,
-    shippingAddress:
-      shippingMethod === "au-flat"
-        ? { addressLine1, addressLine2, suburb, state, postcode }
-        : undefined,
-    lineItems: items,
-  }
+  useEffect(() => {
+    bodyRef.current = {
+      customer: { name, email, phone },
+      shippingMethod,
+      shippingAddress:
+        shippingMethod === "au-flat"
+          ? { addressLine1, addressLine2, suburb, state, postcode }
+          : undefined,
+      lineItems: items,
+    }
+  }, [name, email, phone, shippingMethod, addressLine1, addressLine2, suburb, state, postcode, items])
+  const checkoutRef = useRef<{
+    body: typeof bodyRef.current
+    paypalOrderId: string
+    checkoutToken: string
+  } | null>(null)
 
   const validate = useCallback(() => {
+    const { customer: { name, email, phone }, shippingMethod, shippingAddress } = bodyRef.current
+    const { addressLine1 = "", suburb = "", postcode = "" } = shippingAddress ?? {}
     if (!name.trim()) return "Your name is required."
     if (!email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return "Enter a valid email."
     if (!phone.trim() || phone.replace(/\D/g, "").length < 6) return "Enter a phone number."
@@ -124,7 +129,7 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
       if (!/^\d{4}$/.test(postcode)) return "Postcode must be 4 digits."
     }
     return null
-  }, [name, email, phone, shippingMethod, addressLine1, suburb, postcode])
+  }, [])
 
   const renderPayPalButtons = useCallback(() => {
     if (!buttonRef.current || renderedRef.current || !window.paypal) return
@@ -133,6 +138,7 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
     const buttons = window.paypal.Buttons({
       style: { shape: "rect", layout: "vertical", color: "gold", label: "paypal" },
       createOrder: async () => {
+        checkoutRef.current = null
         const v = validate()
         if (v) {
           setErrorMsg(v)
@@ -140,10 +146,11 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
         }
         setErrorMsg(null)
         setSubmitting(true)
+        const checkoutBody = bodyRef.current
         const res = await fetch("/api/checkout/create-order", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(bodyRef.current),
+          body: JSON.stringify(checkoutBody),
         })
         if (!res.ok) {
           setSubmitting(false)
@@ -152,14 +159,21 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
           setErrorMsg(msg)
           throw new Error(msg)
         }
-        const data = (await res.json()) as { paypalOrderId: string }
+        const data = (await res.json()) as { paypalOrderId: string; checkoutToken: string }
+        checkoutRef.current = { body: checkoutBody, ...data }
         return data.paypalOrderId
       },
       onApprove: async (data) => {
+        const checkout = checkoutRef.current
+        if (!checkout || checkout.paypalOrderId !== data.orderID) {
+          setSubmitting(false)
+          setErrorMsg("Checkout details changed. Please start checkout again.")
+          return
+        }
         const res = await fetch("/api/checkout/capture", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ ...bodyRef.current, paypalOrderId: data.orderID }),
+          body: JSON.stringify({ ...checkout.body, paypalOrderId: data.orderID, checkoutToken: checkout.checkoutToken }),
         })
         setSubmitting(false)
         if (!res.ok) {
@@ -179,6 +193,7 @@ function CheckoutForm({ paypalClientId, paypalEnv }: { paypalClientId: string | 
         setErrorMsg("PayPal couldn't complete checkout. Please try again, or call (02) 4331 9007.")
       },
       onCancel: () => {
+        checkoutRef.current = null
         setSubmitting(false)
       },
     })
