@@ -173,6 +173,7 @@ export async function capturePayPalOrder(paypalOrderId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        Prefer: "return=representation",
       },
       cache: "no-store",
     },

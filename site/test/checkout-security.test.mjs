@@ -138,14 +138,17 @@ test("PayPal adapter exposes the exact order/custom_id and capture currency from
   const calls = []
   const load = createLoader(root, {}, {
     process: { env: { PAYPAL_CLIENT_ID: "test-client", PAYPAL_CLIENT_SECRET: secret } },
-    fetch: async (url) => {
+    fetch: async (url, options) => {
       calls.push(url)
       if (url.endsWith("/v1/oauth2/token")) return Response.json({ access_token: "fake-token", expires_in: 600 })
-      if (url.endsWith("/capture")) return Response.json({
+      if (url.endsWith("/capture")) {
+        assert.equal(options.headers.Prefer, "return=representation")
+        return Response.json({
         id: orderId, status: "COMPLETED", purchase_units: [{ payments: { captures: [{
           id: "CAPTURE123", status: "COMPLETED", amount: { value: "56.00", currency_code: "AUD" },
         }] } }],
-      })
+        })
+      }
       return Response.json({ id: orderId, status: "APPROVED", purchase_units: [{
         custom_id: "bound-reference", amount: { value: "56.00", currency_code: "AUD" }, items: [],
       }] })
