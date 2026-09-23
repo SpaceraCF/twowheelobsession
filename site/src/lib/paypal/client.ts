@@ -203,6 +203,7 @@ export async function capturePayPalOrder(paypalOrderId: string) {
     captureId: capture?.id,
     captureStatus: capture?.status,
     capturedAmount: capture?.amount?.value,
+    capturedCurrency: capture?.amount?.currency_code,
     raw: data,
   }
 }
@@ -228,7 +229,10 @@ export async function getPayPalOrder(paypalOrderId: string) {
   }
 
   const data = (await res.json()) as {
+    id?: string
+    status?: string
     purchase_units?: Array<{
+      custom_id?: string
       amount?: { value?: string; currency_code?: string }
       items?: Array<{
         sku?: string
@@ -241,6 +245,10 @@ export async function getPayPalOrder(paypalOrderId: string) {
   const unit = data.purchase_units?.[0]
   return {
     ok: true as const,
+    orderId: data.id,
+    status: data.status,
+    purchaseUnitCount: data.purchase_units?.length ?? 0,
+    internalReference: unit?.custom_id,
     amount: unit?.amount?.value,
     currency: unit?.amount?.currency_code,
     items: unit?.items ?? [],
