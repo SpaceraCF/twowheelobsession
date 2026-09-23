@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import { headers } from 'next/headers'
 import config from '@payload-config'
+import { isStaffUser } from '@/lib/auth/staff'
 
 // Resets a conversation's `unreadCount` to 0. Called by the
 // conversation thread UI when a staff member opens / views the
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
   const payload = await getPayload({ config })
   const hdrs = await headers()
   const { user } = await payload.auth({ headers: hdrs })
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!isStaffUser(user)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   let json: { conversationId?: string | number }
   try {

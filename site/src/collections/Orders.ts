@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 import { buildCustomerOrderEmail, buildOrderEmail } from '../lib/notifications/build.ts'
 
@@ -23,7 +24,10 @@ export const Orders: CollectionConfig = {
   access: {
     // Server-side only via `payload.create` from the checkout capture
     // endpoint. Never accept anonymous public creates.
-    create: ({ req }) => Boolean(req.user),
+    create: staffOnly,
+    read: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   hooks: {
     afterChange: [

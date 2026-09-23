@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import config from '@payload-config'
 
 import { sendSms } from '@/lib/twilio/client'
+import { isStaffUser } from '@/lib/auth/staff'
 
 // Outbound SMS endpoint — staff replies. Authenticated via Payload's
 // session cookie. Body: { conversationId, body }.
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
   // Authenticate via Payload's auth middleware.
   const hdrs = await headers()
   const { user } = await payload.auth({ headers: hdrs })
-  if (!user) {
+  if (!isStaffUser(user)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 

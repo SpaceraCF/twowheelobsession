@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 // Hero carousel slides — staff-managed via Payload admin so swapping
 // Yamaha campaign artwork doesn't need a code deploy. Replaces the
@@ -17,6 +18,9 @@ export const HeroSlides: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   fields: [
     {

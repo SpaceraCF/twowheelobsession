@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { staffOnly } from '../lib/auth/staff.ts'
 
 export const Brands: CollectionConfig = {
   slug: 'brands',
@@ -6,6 +7,7 @@ export const Brands: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'displayOrder'],
   },
+  access: { create: staffOnly, read: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [
     { name: 'name', type: 'text', required: true },
     { name: 'slug', type: 'text', required: true, unique: true, index: true },

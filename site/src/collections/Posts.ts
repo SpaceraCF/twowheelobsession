@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { isStaffUser, staffOnly } from '../lib/auth/staff.ts'
 
 // Workshop news / blog.
 //
@@ -35,9 +36,12 @@ export const Posts: CollectionConfig = {
     // Anonymous visitors only ever see published posts. Any logged-in
     // staff member sees drafts too so they can preview their own work.
     read: ({ req: { user } }) => {
-      if (user) return true
+      if (isStaffUser(user)) return true
       return { _status: { equals: 'published' } }
     },
+    create: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   versions: { drafts: true },
   hooks: {

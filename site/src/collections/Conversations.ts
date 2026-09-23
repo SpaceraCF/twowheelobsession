@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOnly, staffOnly } from '../lib/auth/staff.ts'
 
 // One row per customer phone number. Aggregates all inbound /
 // outbound SMS for that customer into a single thread.
@@ -41,11 +42,10 @@ export const Conversations: CollectionConfig = {
     // Logged-in staff can read / update / assign. The inbound webhook
     // creates new rows via the Payload Local API which bypasses
     // access checks; we never accept anonymous public creates.
-    create: ({ req }) => Boolean(req.user),
-    read: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) =>
-      Boolean(req.user && (req.user as { role?: string }).role === 'admin'),
+    create: staffOnly,
+    read: staffOnly,
+    update: staffOnly,
+    delete: adminOnly,
   },
   fields: [
     {
